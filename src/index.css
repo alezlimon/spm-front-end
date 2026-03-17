@@ -109,3 +109,15 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.assistant {
+  background-color: #111827;
+  color: white;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.assistant h3 {
+  margin: 0 0 8px;
+}
