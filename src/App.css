@@ -13,10 +13,12 @@ body {
   width: 100%;
 }
 
+/* Mobile first app container */
 .app {
-  max-width: 1100px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 24px 16px 40px;
+  padding: 16px 8px 24px;
 }
 
 .header {
@@ -68,18 +70,20 @@ body {
 }
 
 /* DASHBOARD SUMMARY */
+/* Mobile first summary grid */
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
+/* Mobile first summary card */
 .summary-card {
   background-color: #ffffff;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   text-align: center;
@@ -126,18 +130,46 @@ body {
 }
 
 /* ROOM GRID */
+/* Mobile first rooms grid */
 .rooms-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 /* ROOM CARD */
+/* Mobile first room card */
 .room-card {
   background-color: #ffffff;
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+/* Desktop styles: min-width 1024px */
+@media (min-width: 1024px) {
+  .app {
+    max-width: 1100px;
+    padding: 24px 16px 40px;
+  }
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .summary-card {
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+  .rooms-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .room-card {
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .room-card h3 {
@@ -221,4 +253,20 @@ body {
   border: 1px solid #d1d5db;
   border-radius: 12px;
   font-size: 0.95rem;
+}
+
+.maintenance-link {
+  padding: 5px;
+  display: inline-block;
+  cursor: pointer;
+  z-index: 10;
+  color: #e11d48;
+  opacity: 0.8;
+  font-size: 1em;
+  user-select: none;
+  transition: color 0.2s;
+}
+.maintenance-link:hover {
+  color: #be123c;
+  opacity: 1;
 }
