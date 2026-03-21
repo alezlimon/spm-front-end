@@ -5,7 +5,7 @@ import EditGuestForm from './EditGuestForm';
 export default function GuestList({ guests, onGuestUpdated }) {
   const [editingId, setEditingId] = useState(null);
 
-  if (!guests.length) return <p style={{color:'#6b7280'}}>No hay huéspedes registrados.</p>;
+  if (!guests.length) return <p style={{color:'#6b7280'}}>No guests found.</p>;
 
   const handleEdit = (id) => setEditingId(id);
   const handleCancel = () => setEditingId(null);
@@ -35,9 +35,9 @@ export default function GuestList({ guests, onGuestUpdated }) {
           ) : (
             <>
               <strong>{guest.firstName} {guest.lastName}</strong><br/>
-              <span style={{color:'#6b7280'}}>Documento: {guest.document}</span><br/>
-              <span style={{color:'#6b7280'}}>Fecha de nacimiento: {guest.birthDate ? new Date(guest.birthDate).toLocaleDateString() : '-'}</span><br/>
-              <button onClick={() => handleEdit(guest._id)} style={{marginTop:8,background:'#111827',color:'#fff',border:'none',borderRadius:6,padding:'4px 12px',fontSize:'0.95em',cursor:'pointer'}}>Editar</button>
+              <span style={{color:'#6b7280'}}>Document: {guest.document}</span><br/>
+              <span style={{color:'#6b7280'}}>Birth date: {guest.birthDate ? new Date(guest.birthDate).toLocaleDateString() : '-'}</span><br/>
+              <button onClick={() => handleEdit(guest._id)} style={{marginTop:8,background:'#111827',color:'#fff',border:'none',borderRadius:6,padding:'4px 12px',fontSize:'0.95em',cursor:'pointer'}}>Edit</button>
             </>
           )}
         </li>

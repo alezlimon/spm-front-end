@@ -82,7 +82,7 @@ function NewGuestForm({ onGuestCreated }) {
       <h2 style={{margin: '0 0 8px', fontSize: '1.1rem', color: '#6b7280'}}>Add New Guest</h2>
       <input
         name="firstName"
-        placeholder="First Name"
+        placeholder="First name"
         value={form.firstName}
         onChange={handleChange}
         required
@@ -90,7 +90,7 @@ function NewGuestForm({ onGuestCreated }) {
       />
       <input
         name="lastName"
-        placeholder="Last Name"
+        placeholder="Last name"
         value={form.lastName}
         onChange={handleChange}
         required
@@ -107,7 +107,7 @@ function NewGuestForm({ onGuestCreated }) {
       />
       <input
         name="document"
-        placeholder="Passport / DNI"
+        placeholder="Passport / ID"
         value={form.document}
         onChange={handleChange}
         required
@@ -116,7 +116,7 @@ function NewGuestForm({ onGuestCreated }) {
       <input
         name="birthDate"
         type="date"
-        placeholder="Fecha de nacimiento"
+        placeholder="Birth date"
         value={form.birthDate}
         onChange={handleChange}
         required

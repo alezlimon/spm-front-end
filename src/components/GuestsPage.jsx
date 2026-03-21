@@ -44,16 +44,16 @@ export default function GuestsPage() {
 
   return (
     <div style={{ maxWidth: 600, margin: '40px auto', padding: 24 }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: 24 }}>Gestión de Huéspedes</h1>
+      <h1 style={{ fontSize: '2rem', marginBottom: 24 }}>Guest Management</h1>
       <NewGuestForm onGuestCreated={handleGuestCreated} />
       <input
         type="text"
-        placeholder="Buscar por nombre o documento..."
+        placeholder="Search by name or document..."
         value={search}
         onChange={handleSearch}
         style={{width:'100%',padding:8,borderRadius:8,border:'1px solid #d1d5db',margin:'16px 0'}}
       />
-      {loading && <p style={{color:'#6b7280'}}>Cargando huéspedes...</p>}
+      {loading && <p style={{color:'#6b7280'}}>Loading guests...</p>}
       {error && <p style={{color:'#b91c1c'}}>{error}</p>}
       <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />
     </div>
