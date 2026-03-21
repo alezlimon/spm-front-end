@@ -1,11 +1,14 @@
 import { useState } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+
 function NewGuestForm({ onGuestCreated }) {
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    document: ''
+    document: '',
+    birthDate: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -17,27 +20,50 @@ function NewGuestForm({ onGuestCreated }) {
     setSuccess(false)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess(false)
-    try {
-      const res = await fetch('http://localhost:5005/api/guests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      })
-      if (!res.ok) throw new Error('Error creating guest')
-      setSuccess(true)
-      setForm({ firstName: '', lastName: '', email: '', document: '' })
-      if (onGuestCreated) onGuestCreated()
-    } catch (err) {
-      setError('Could not create guest')
-    } finally {
-      setLoading(false)
-    }
+  // Validación simple de email
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    // Validación previa
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.document.trim() || !form.birthDate) {
+      setError("All fields are required");
+      return;
+    }
+    if (!isValidEmail(form.email)) {
+      setError("Invalid email format");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/guests`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        let msg = "Could not create guest";
+        try {
+          const data = await res.json();
+          if (data && data.message) msg = data.message;
+        } catch {}
+        throw new Error(msg);
+      }
+      setSuccess(true);
+      setForm({ firstName: "", lastName: "", email: "", document: "", birthDate: "" });
+      if (onGuestCreated) onGuestCreated();
+    } catch (err) {
+      setError(err.message || "Could not create guest");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} style={{
@@ -83,6 +109,15 @@ function NewGuestForm({ onGuestCreated }) {
         name="document"
         placeholder="Passport / DNI"
         value={form.document}
+        onChange={handleChange}
+        required
+        style={{padding: 8, borderRadius: 8, border: '1px solid #d1d5db'}}
+      />
+      <input
+        name="birthDate"
+        type="date"
+        placeholder="Fecha de nacimiento"
+        value={form.birthDate}
         onChange={handleChange}
         required
         style={{padding: 8, borderRadius: 8, border: '1px solid #d1d5db'}}
