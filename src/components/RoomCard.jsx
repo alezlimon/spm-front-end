@@ -1,9 +1,6 @@
-
-
-
-
 function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
   let actionButton = null;
+
   switch (room.status) {
     case 'Available':
       actionButton = (
@@ -32,27 +29,41 @@ function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
 
   return (
     <div className="room-card">
-      <h3>Room {room.roomNumber}</h3>
-      <p>Type: {room.type}</p>
-      <p>Price: €{room.pricePerNight}</p>
-      <p>Clean: {room.isClean ? 'Yes' : 'No'}</p>
+      <div className="room-card-top">
+        <div>
+          <h3>Room {room.roomNumber}</h3>
+          <p className="room-card-subtitle">{room.type}</p>
+        </div>
 
-      <span className={`status-badge ${getStatusClass(room.status)}`}>
-        {room.status}
-      </span>
-
-      {/* Mostrar huésped si está ocupada */}
-      {room.status === 'Occupied' && currentBooking && currentBooking.guest && (
-        <p style={{ margin: '8px 0', color: '#374151', fontWeight: 500 }}>
-          Guest: {currentBooking.guest.firstName} {currentBooking.guest.lastName}
-        </p>
-      )}
-
-      <div className="room-actions">
-        {actionButton}
+        <span className={`status-badge ${getStatusClass(room.status)}`}>
+          {room.status}
+        </span>
       </div>
+
+      <div className="room-card-details">
+        <div className="room-detail-item">
+          <span>Rate</span>
+          <strong>€{room.pricePerNight}</strong>
+        </div>
+
+        <div className="room-detail-item">
+          <span>Clean</span>
+          <strong>{room.isClean ? 'Yes' : 'No'}</strong>
+        </div>
+
+        {room.status === 'Occupied' && currentBooking && currentBooking.guest && (
+          <div className="room-detail-item room-detail-item-full">
+            <span>Guest</span>
+            <strong>
+              {currentBooking.guest.firstName} {currentBooking.guest.lastName}
+            </strong>
+          </div>
+        )}
+      </div>
+
+      {actionButton && <div className="room-actions">{actionButton}</div>}
     </div>
   );
 }
 
-export default RoomCard
+export default RoomCard;

@@ -1,31 +1,41 @@
-
 import { useState } from 'react';
 import EditGuestForm from './EditGuestForm';
+import '../App.css';
 
 export default function GuestList({ guests, onGuestUpdated }) {
   const [editingId, setEditingId] = useState(null);
 
-  if (!guests.length) return <p style={{color:'#6b7280'}}>No guests found.</p>;
+  if (!guests.length) {
+    return <p className="page-feedback">No guests found.</p>;
+  }
 
   const handleEdit = (id) => setEditingId(id);
   const handleCancel = () => setEditingId(null);
 
   const handleSave = async (id, updatedData) => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+
     const res = await fetch(`${API_URL}/guests/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedData)
     });
-    if (!res.ok) throw new Error('No se pudo actualizar el huésped');
+
+    if (!res.ok) {
+      throw new Error('Could not update guest');
+    }
+
     setEditingId(null);
-    if (onGuestUpdated) onGuestUpdated();
+
+    if (onGuestUpdated) {
+      onGuestUpdated();
+    }
   };
 
   return (
-    <ul style={{marginTop: 24, padding: 0, listStyle: 'none'}}>
-      {guests.map(guest => (
-        <li key={guest._id} style={{background:'#fff',borderRadius:8,padding:12,marginBottom:10,boxShadow:'0 1px 4px #eee'}}>
+    <div className="guest-list">
+      {guests.map((guest) => (
+        <div key={guest._id} className="guest-card">
           {editingId === guest._id ? (
             <EditGuestForm
               guest={guest}
@@ -34,14 +44,38 @@ export default function GuestList({ guests, onGuestUpdated }) {
             />
           ) : (
             <>
-              <strong>{guest.firstName} {guest.lastName}</strong><br/>
-              <span style={{color:'#6b7280'}}>Document: {guest.document}</span><br/>
-              <span style={{color:'#6b7280'}}>Birth date: {guest.birthDate ? new Date(guest.birthDate).toLocaleDateString() : '-'}</span><br/>
-              <button onClick={() => handleEdit(guest._id)} style={{marginTop:8,background:'#111827',color:'#fff',border:'none',borderRadius:6,padding:'4px 12px',fontSize:'0.95em',cursor:'pointer'}}>Edit</button>
+              <div className="guest-card-header">
+                <h3>
+                  {guest.firstName} {guest.lastName}
+                </h3>
+                <button
+                  className="secondary-button"
+                  onClick={() => handleEdit(guest._id)}
+                >
+                  Edit
+                </button>
+              </div>
+
+              <div className="guest-card-details">
+                <p>
+                  <span>Email</span>
+                  {guest.email || '-'}
+                </p>
+                <p>
+                  <span>Document</span>
+                  {guest.document || '-'}
+                </p>
+                <p>
+                  <span>Birth date</span>
+                  {guest.birthDate
+                    ? new Date(guest.birthDate).toLocaleDateString()
+                    : '-'}
+                </p>
+              </div>
             </>
           )}
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

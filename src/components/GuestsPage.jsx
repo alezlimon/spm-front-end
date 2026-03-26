@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import NewGuestForm from './NewGuestForm';
 import GuestList from './GuestList';
+import '../App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
@@ -14,16 +14,22 @@ export default function GuestsPage() {
   const fetchGuests = async (query = '') => {
     setLoading(true);
     setError('');
+
     try {
       const url = query
         ? `${API_URL}/guests/search?query=${encodeURIComponent(query)}`
         : `${API_URL}/guests`;
+
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Error fetching guests');
+
+      if (!res.ok) {
+        throw new Error('Error fetching guests');
+      }
+
       const data = await res.json();
       setGuests(data);
     } catch (err) {
-      setError('No se pudieron cargar los huéspedes');
+      setError('Could not load guests');
     } finally {
       setLoading(false);
     }
@@ -34,8 +40,9 @@ export default function GuestsPage() {
   }, []);
 
   const handleSearch = (e) => {
-    setSearch(e.target.value);
-    fetchGuests(e.target.value);
+    const value = e.target.value;
+    setSearch(value);
+    fetchGuests(value);
   };
 
   const handleGuestCreated = () => {
@@ -43,19 +50,35 @@ export default function GuestsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '40px auto', padding: 24 }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: 24 }}>Guest Management</h1>
-      <NewGuestForm onGuestCreated={handleGuestCreated} />
-      <input
-        type="text"
-        placeholder="Search by name or document..."
-        value={search}
-        onChange={handleSearch}
-        style={{width:'100%',padding:8,borderRadius:8,border:'1px solid #d1d5db',margin:'16px 0'}}
-      />
-      {loading && <p style={{color:'#6b7280'}}>Loading guests...</p>}
-      {error && <p style={{color:'#b91c1c'}}>{error}</p>}
-      <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />
+    <div className="app">
+      <header className="header">
+        <h1>Guests</h1>
+        <p>Register, search, and update guest profiles in one clean workflow.</p>
+      </header>
+
+      <section className="guests-page-layout">
+        <div className="guests-form-column">
+          <NewGuestForm onGuestCreated={handleGuestCreated} />
+        </div>
+
+        <div className="guests-list-column">
+          <div className="search-bar guests-search-bar">
+            <input
+              type="text"
+              placeholder="Search by name or document"
+              value={search}
+              onChange={handleSearch}
+            />
+          </div>
+
+          {loading && <p className="page-feedback">Loading guests...</p>}
+          {error && <p className="page-feedback page-feedback-error">{error}</p>}
+
+          {!loading && !error && (
+            <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />
+          )}
+        </div>
+      </section>
     </div>
   );
 }

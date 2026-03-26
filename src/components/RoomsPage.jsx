@@ -1,10 +1,8 @@
-
-
 import { useState, useEffect } from 'react';
 import RoomCard from './RoomCard';
-import RoomBookings from './RoomBookings';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import '../App.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState([]);
@@ -17,9 +15,14 @@ export default function RoomsPage() {
     const fetchRooms = async () => {
       setLoading(true);
       setError('');
+
       try {
         const res = await fetch(`${API_URL}/rooms`);
-        if (!res.ok) throw new Error('Error fetching rooms');
+
+        if (!res.ok) {
+          throw new Error('Error fetching rooms');
+        }
+
         const data = await res.json();
         setRooms(data);
       } catch (err) {
@@ -28,6 +31,7 @@ export default function RoomsPage() {
         setLoading(false);
       }
     };
+
     fetchRooms();
   }, []);
 
@@ -39,30 +43,37 @@ export default function RoomsPage() {
     return '';
   };
 
-  const updateRoomStatus = (roomId, newStatus) => {
-    fetch(`${API_URL}/rooms/${roomId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((res) => res.json())
-      .then((updatedRoom) => {
-        setRooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room._id === updatedRoom._id ? updatedRoom : room
-          )
-        );
-      })
-      .catch((err) => console.error(err));
+  const updateRoomStatus = async (roomId, newStatus) => {
+    try {
+      const res = await fetch(`${API_URL}/rooms/${roomId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!res.ok) {
+        throw new Error('Could not update room');
+      }
+
+      const updatedRoom = await res.json();
+
+      setRooms((prevRooms) =>
+        prevRooms.map((room) =>
+          room._id === updatedRoom._id ? updatedRoom : room
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const totalRooms = rooms.length;
-  const availableRooms = rooms.filter((r) => r.status === 'Available').length;
-  const occupiedRooms = rooms.filter((r) => r.status === 'Occupied').length;
-  const dirtyRooms = rooms.filter((r) => r.status === 'Dirty').length;
-  const maintenanceRooms = rooms.filter((r) => r.status === 'Maintenance').length;
+  const availableRooms = rooms.filter((room) => room.status === 'Available').length;
+  const occupiedRooms = rooms.filter((room) => room.status === 'Occupied').length;
+  const dirtyRooms = rooms.filter((room) => room.status === 'Dirty').length;
+  const maintenanceRooms = rooms.filter((room) => room.status === 'Maintenance').length;
 
   const occupancyRate =
     totalRooms === 0 ? 0 : Math.round((occupiedRooms / totalRooms) * 100);
@@ -71,17 +82,21 @@ export default function RoomsPage() {
     if (dirtyRooms >= 2) {
       return 'Priority alert: multiple rooms need cleaning.';
     }
+
     if (maintenanceRooms >= 1) {
       return 'Attention: at least one room is under maintenance.';
     }
+
     if (occupancyRate >= 80) {
       return 'High occupancy detected. Room turnover should stay efficient.';
     }
+
     return 'Operations are stable right now.';
   };
 
   const generateSummary = () => {
-    if (rooms.length === 0) return '';
+    if (rooms.length === 0) return 'No room data available yet.';
+
     return `Occupancy is at ${occupancyRate}%. You have ${availableRooms} available, ${occupiedRooms} occupied, ${dirtyRooms} dirty, and ${maintenanceRooms} in maintenance.`;
   };
 
@@ -93,9 +108,11 @@ export default function RoomsPage() {
 
   const getCleaningSuggestion = () => {
     const dirtyRoomList = rooms.filter((room) => room.status === 'Dirty');
+
     if (dirtyRoomList.length === 0) {
       return 'No cleaning suggestion right now.';
     }
+
     return `Suggested action: clean Room ${dirtyRoomList[0].roomNumber} first.`;
   };
 
@@ -106,6 +123,7 @@ export default function RoomsPage() {
     })
     .filter((room) => {
       const searchValue = searchTerm.toLowerCase();
+
       return (
         room.roomNumber.toLowerCase().includes(searchValue) ||
         room.type.toLowerCase().includes(searchValue) ||
@@ -114,73 +132,96 @@ export default function RoomsPage() {
     });
 
   return (
-    <div className="rooms-page">
+    <div className="app">
       <header className="header">
         <h1>Rooms</h1>
-        <p>Room management and operations dashboard</p>
+        <p>Monitor room status, room turnover, and operational priorities from one dashboard.</p>
       </header>
-      <div className={getAssistantClass()}>
-        <h3>Operations Assistant</h3>
-        <p>{generateSummary()}</p>
-        <p className="assistant-alert">{getPriorityAlert()}</p>
-        <p className="assistant-suggestion">{getCleaningSuggestion()}</p>
-      </div>
-      <section className="summary-grid">
-        <div className="summary-card" onClick={() => setFilter('All')}>
-          <h3>Total Rooms</h3>
-          <p>{totalRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Available')}>
-          <h3>Available</h3>
-          <p>{availableRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Occupied')}>
-          <h3>Occupied</h3>
-          <p>{occupiedRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Maintenance')}>
-          <h3>Maintenance</h3>
-          <p>{maintenanceRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Dirty')}>
-          <h3>Dirty</h3>
-          <p>{dirtyRooms}</p>
-        </div>
-      </section>
-      <div className="filter-bar">
-        <button onClick={() => setFilter('All')}>All</button>
-        <button onClick={() => setFilter('Available')}>Available</button>
-        <button onClick={() => setFilter('Occupied')}>Occupied</button>
-        <button onClick={() => setFilter('Maintenance')}>Maintenance</button>
-        <button onClick={() => setFilter('Dirty')}>Dirty</button>
-      </div>
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Search by room number, type, or status"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <section>
-        <h2>Rooms</h2>
-        {loading && <p style={{color:'#6b7280'}}>Loading rooms...</p>}
-        {error && <p style={{color:'#b91c1c'}}>{error}</p>}
-        {filteredRooms.length === 0 ? (
-          <p>No rooms found</p>
-        ) : (
-          <div className="rooms-grid">
-            {filteredRooms.map((room) => (
-              <RoomCard
-                key={room._id}
-                room={room}
-                getStatusClass={getStatusClass}
-                updateRoomStatus={updateRoomStatus}
-              />
-            ))}
+
+      <div className="rooms-layout">
+        <section className="rooms-top-grid">
+          <div className={getAssistantClass()}>
+            <h3>Operations Assistant</h3>
+            <p>{generateSummary()}</p>
+            <p className="assistant-alert">{getPriorityAlert()}</p>
+            <p className="assistant-suggestion">{getCleaningSuggestion()}</p>
           </div>
-        )}
-      </section>
+
+          <div className="rooms-kpi-grid">
+            <div className="summary-card" onClick={() => setFilter('All')}>
+              <h3>Total Rooms</h3>
+              <p>{totalRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Available')}>
+              <h3>Available</h3>
+              <p>{availableRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Occupied')}>
+              <h3>Occupied</h3>
+              <p>{occupiedRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Maintenance')}>
+              <h3>Maintenance</h3>
+              <p>{maintenanceRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Dirty')}>
+              <h3>Dirty</h3>
+              <p>{dirtyRooms}</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rooms-controls">
+          <div>
+            <h3 className="rooms-section-title">Filters</h3>
+            <div className="filter-bar">
+              <button onClick={() => setFilter('All')}>All</button>
+              <button onClick={() => setFilter('Available')}>Available</button>
+              <button onClick={() => setFilter('Occupied')}>Occupied</button>
+              <button onClick={() => setFilter('Maintenance')}>Maintenance</button>
+              <button onClick={() => setFilter('Dirty')}>Dirty</button>
+            </div>
+          </div>
+
+          <div>
+            <h3 className="rooms-section-title">Search</h3>
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder="Search by room number, type, or status"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          {loading && <p className="page-feedback">Loading rooms...</p>}
+          {error && <p className="page-feedback page-feedback-error">{error}</p>}
+
+          {!loading && !error && filteredRooms.length === 0 && (
+            <p className="page-feedback">No rooms found.</p>
+          )}
+
+          {!loading && !error && filteredRooms.length > 0 && (
+            <div className="rooms-grid">
+              {filteredRooms.map((room) => (
+                <RoomCard
+                  key={room._id}
+                  room={room}
+                  getStatusClass={getStatusClass}
+                  updateRoomStatus={updateRoomStatus}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
