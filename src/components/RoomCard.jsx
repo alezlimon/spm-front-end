@@ -27,10 +27,21 @@ function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
       actionButton = null;
   }
 
+  const formatDate = (dateValue) => {
+    if (!dateValue) return '—';
+    return new Date(dateValue).toLocaleDateString();
+  };
+
+  const hasGuestBooking = currentBooking && currentBooking.guest;
+
+  const guestName = hasGuestBooking
+    ? `${currentBooking.guest.firstName} ${currentBooking.guest.lastName}`
+    : '';
+
   return (
     <div className="room-card">
       <div className="room-card-top">
-        <div>
+        <div className="room-card-heading">
           <h3>Room {room.roomNumber}</h3>
           <p className="room-card-subtitle">{room.type}</p>
         </div>
@@ -50,16 +61,28 @@ function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
           <span>Clean</span>
           <strong>{room.isClean ? 'Yes' : 'No'}</strong>
         </div>
+      </div>
 
-        {room.status === 'Occupied' && currentBooking && currentBooking.guest && (
+      {hasGuestBooking && (
+        <div className="room-card-booking">
           <div className="room-detail-item room-detail-item-full">
             <span>Guest</span>
-            <strong>
-              {currentBooking.guest.firstName} {currentBooking.guest.lastName}
-            </strong>
+            <strong>{guestName}</strong>
           </div>
-        )}
-      </div>
+
+          <div className="room-card-booking-dates">
+            <div className="room-detail-item">
+              <span>Check-In</span>
+              <strong>{formatDate(currentBooking.checkInDate)}</strong>
+            </div>
+
+            <div className="room-detail-item">
+              <span>Check-Out</span>
+              <strong>{formatDate(currentBooking.checkOutDate)}</strong>
+            </div>
+          </div>
+        </div>
+      )}
 
       {actionButton && <div className="room-actions">{actionButton}</div>}
     </div>

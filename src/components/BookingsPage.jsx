@@ -1,5 +1,3 @@
-
-
 import '../App.css';
 import BookingsTable from './BookingsTable';
 
@@ -8,8 +6,9 @@ export default function BookingsPage() {
     <div className="app">
       <header className="header">
         <h1>Bookings</h1>
-        <p>Track reservations, check-in flow, and upcoming room activity from one place.</p>
+        <p>Reservations, arrivals, and room assignment in one streamlined view.</p>
       </header>
+
       <BookingsTable />
     </div>
   );

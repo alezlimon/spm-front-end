@@ -6,25 +6,32 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function RoomsPage() {
   const [rooms, setRooms] = useState([]);
+  const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError('');
 
       try {
-        const res = await fetch(`${API_URL}/rooms`);
+        const [roomsRes, bookingsRes] = await Promise.all([
+          fetch(`${API_URL}/rooms`),
+          fetch(`${API_URL}/bookings`)
+        ]);
 
-        if (!res.ok) {
-          throw new Error('Error fetching rooms');
+        if (!roomsRes.ok || !bookingsRes.ok) {
+          throw new Error('Error fetching room data');
         }
 
-        const data = await res.json();
-        setRooms(data);
+        const roomsData = await roomsRes.json();
+        const bookingsData = await bookingsRes.json();
+
+        setRooms(roomsData);
+        setBookings(bookingsData);
       } catch (err) {
         setError('Could not load rooms');
       } finally {
@@ -32,7 +39,7 @@ export default function RoomsPage() {
       }
     };
 
-    fetchRooms();
+    fetchData();
   }, []);
 
   const getStatusClass = (status) => {
@@ -67,6 +74,28 @@ export default function RoomsPage() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const getCurrentBookingForRoom = (roomId) => {
+    const roomBookings = bookings.filter((booking) => {
+      if (!booking.room) return false;
+
+      const bookingRoomId =
+        typeof booking.room === 'string' ? booking.room : booking.room._id;
+
+      return bookingRoomId === roomId;
+    });
+
+    if (roomBookings.length === 0) return null;
+
+    const activeStatuses = ['confirmed', 'checked-in'];
+
+    const prioritizedBooking =
+      roomBookings.find((booking) =>
+        booking.status ? activeStatuses.includes(booking.status.toLowerCase()) : false
+      ) || roomBookings[0];
+
+    return prioritizedBooking;
   };
 
   const totalRooms = rooms.length;
@@ -214,6 +243,7 @@ export default function RoomsPage() {
                 <RoomCard
                   key={room._id}
                   room={room}
+                  currentBooking={getCurrentBookingForRoom(room._id)}
                   getStatusClass={getStatusClass}
                   updateRoomStatus={updateRoomStatus}
                 />
