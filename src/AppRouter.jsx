@@ -5,6 +5,7 @@ import BookingsPage from './components/BookingsPage';
 import AuthPage from './components/AuthPage';
 import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
+import PropertyDetailPage from './components/PropertyDetailPage';
 
 function AppLayout() {
   const location = useLocation();
@@ -16,6 +17,7 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<AuthPage />} />
         <Route path="/properties" element={<PropertiesPage />} />
+        <Route path="/properties/:propertyId" element={<PropertyDetailPage />} />
         <Route path="/guests" element={<GuestsPage />} />
         <Route path="/rooms" element={<RoomsPage />} />
         <Route path="/bookings" element={<BookingsPage />} />
