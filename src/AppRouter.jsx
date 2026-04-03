@@ -6,6 +6,7 @@ import AuthPage from './components/AuthPage';
 import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
 import PropertyLayout from './components/PropertyLayout';
+import PropertyOverviewPage from './components/PropertyOverviewPage';
 
 function AppLayout() {
   const location = useLocation();
@@ -18,7 +19,8 @@ function AppLayout() {
         <Route path="/" element={<AuthPage />} />
         <Route path="/properties" element={<PropertiesPage />} />
         <Route path="/properties/:propertyId" element={<PropertyLayout />}>
-          <Route index element={<Navigate to="rooms" replace />} />
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<PropertyOverviewPage />} />
           <Route path="rooms" element={<RoomsPage />} />
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="guests" element={<GuestsPage />} />

@@ -1,26 +1,59 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import '../App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
+const getEntityId = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  return value._id || value.id || null;
+};
+
 export default function BookingsTable() {
+  const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setLoading(true);
-    setError('');
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError('');
 
-    fetch(`${API_URL}/bookings`)
-      .then((res) => {
-        if (!res.ok) throw new Error('Error fetching bookings');
-        return res.json();
-      })
-      .then((data) => setBookings(data))
-      .catch((err) => setError(err.message || 'Error fetching bookings'))
-      .finally(() => setLoading(false));
-  }, []);
+      try {
+        const [roomsRes, bookingsRes] = await Promise.all([
+          propertyId
+            ? fetch(`${API_URL}/properties/${propertyId}/rooms`)
+            : fetch(`${API_URL}/rooms`),
+          fetch(`${API_URL}/bookings`)
+        ]);
+
+        if (!roomsRes.ok || !bookingsRes.ok) {
+          throw new Error('Error fetching bookings');
+        }
+
+        const [roomsData, bookingsData] = await Promise.all([
+          roomsRes.json(),
+          bookingsRes.json()
+        ]);
+
+        const roomIds = new Set((roomsData || []).map((room) => room._id));
+        const scopedBookings = (bookingsData || []).filter((booking) => {
+          const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
+          return bookingRoomId ? roomIds.has(bookingRoomId) : false;
+        });
+
+        setBookings(scopedBookings);
+      } catch (err) {
+        setError(err.message || 'Error fetching bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [propertyId]);
 
   const formatDate = (dateValue) => {
     if (!dateValue) return '—';

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
-import { PROPERTIES } from '../propertiesConfig';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 const subNavStyle = {
   background: '#0D0E10',
@@ -47,7 +49,11 @@ const titleStyle = {
   color: '#F5F7FA',
   fontWeight: 600,
   fontSize: '0.93rem',
-  letterSpacing: '-0.02em'
+  letterSpacing: '-0.02em',
+  textDecoration: 'none',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px'
 };
 
 const typeStyle = {
@@ -77,7 +83,26 @@ const getTabStyle = ({ isActive }) => ({
 
 export default function PropertyLayout() {
   const { propertyId } = useParams();
-  const property = PROPERTIES.find((p) => p._id === propertyId);
+  const [property, setProperty] = useState(null);
+
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const res = await fetch(`${API_URL}/properties/${propertyId}`);
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        setProperty(data?.property || data || null);
+      } catch (err) {
+        setProperty(null);
+      }
+    };
+
+    fetchProperty();
+  }, [propertyId]);
 
   return (
     <>
@@ -89,10 +114,10 @@ export default function PropertyLayout() {
             </Link>
             <span style={separatorStyle}>·</span>
             <div>
-              <span style={titleStyle}>{property?.name || 'Property'}</span>
-              {property?.type && (
-                <span style={typeStyle}>{property.type}</span>
-              )}
+              <Link to={`/properties/${propertyId}/overview`} style={titleStyle}>
+                <span>{property?.name || 'Property'}</span>
+                {property?.type && <span style={typeStyle}>{property.type}</span>}
+              </Link>
             </div>
           </div>
 

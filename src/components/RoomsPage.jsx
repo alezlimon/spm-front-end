@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import RoomCard from './RoomCard';
 import '../App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function RoomsPage() {
+  const { propertyId } = useParams();
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState('All');
@@ -18,8 +20,12 @@ export default function RoomsPage() {
       setError('');
 
       try {
+        const roomsUrl = propertyId
+          ? `${API_URL}/properties/${propertyId}/rooms`
+          : `${API_URL}/rooms`;
+
         const [roomsRes, bookingsRes] = await Promise.all([
-          fetch(`${API_URL}/rooms`),
+          fetch(roomsUrl),
           fetch(`${API_URL}/bookings`)
         ]);
 
@@ -40,7 +46,7 @@ export default function RoomsPage() {
     };
 
     fetchData();
-  }, []);
+  }, [propertyId]);
 
   const getStatusClass = (status) => {
     if (status === 'Available') return 'status-available';
