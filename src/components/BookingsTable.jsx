@@ -10,9 +10,23 @@ const getEntityId = (value) => {
   return value._id || value.id || null;
 };
 
+const toInputDate = (dateValue = new Date()) => {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeStatus = (status) => (status || '').toLowerCase();
+
 export default function BookingsTable() {
   const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(toInputDate());
+  const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -73,7 +87,7 @@ export default function BookingsTable() {
   const getStatusClass = (status) => {
     if (!status) return 'status-maintenance';
 
-    const value = status.toLowerCase();
+    const value = normalizeStatus(status);
 
     if (value === 'confirmed') return 'status-available';
     if (value === 'checked-in') return 'status-occupied';
@@ -83,21 +97,78 @@ export default function BookingsTable() {
     return 'status-maintenance';
   };
 
+  const filteredBookings = bookings.filter((booking) => {
+    const bookingCheckIn = toInputDate(booking.checkInDate);
+    const matchesDate = bookingCheckIn === selectedDate;
+
+    if (!matchesDate) {
+      return false;
+    }
+
+    if (statusFilter === 'all') {
+      return true;
+    }
+
+    return normalizeStatus(booking.status) === statusFilter;
+  });
+
   return (
     <div className="bookings-table-wrapper">
       <div className="bookings-table-header">
-        <h3>Upcoming Reservations</h3>
-        <p>Track guest assignment, room allocation, and reservation status.</p>
+        <div className="bookings-table-header-top">
+          <h3>Today</h3>
+
+          <div className="bookings-header-controls">
+            <label className="bookings-date-control" htmlFor="bookings-date-filter">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M8 3V7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M16 3V7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M3 10H21" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+              <input
+                id="bookings-date-filter"
+                type="date"
+                value={selectedDate}
+                onChange={(event) => setSelectedDate(event.target.value)}
+              />
+            </label>
+
+            <label className="bookings-status-control" htmlFor="bookings-status-filter">
+              <span>Status</span>
+              <select
+                id="bookings-status-filter"
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+              >
+                <option value="all">All</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="checked-in">Checked In</option>
+                <option value="checked-out">Checked Out</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <p>Track reservations for the selected day and filter by status.</p>
       </div>
 
       {loading && <p className="page-feedback">Loading bookings...</p>}
       {error && <p className="page-feedback page-feedback-error">{error}</p>}
 
-      {!loading && !error && bookings.length === 0 && (
+      {!loading && !error && filteredBookings.length === 0 && (
         <p className="page-feedback">No bookings found.</p>
       )}
 
-      {!loading && !error && bookings.length > 0 && (
+      {!loading && !error && filteredBookings.length > 0 && (
         <div className="bookings-table-scroll">
           <table className="bookings-table">
             <thead>
@@ -113,7 +184,7 @@ export default function BookingsTable() {
             </thead>
 
             <tbody>
-              {bookings.map((booking) => (
+              {filteredBookings.map((booking) => (
                 <tr key={booking._id}>
                   <td className="booking-reference">{booking._id.slice(-6).toUpperCase()}</td>
                   <td>{getGuestName(booking)}</td>

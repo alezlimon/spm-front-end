@@ -1542,6 +1542,14 @@ a {
   margin-bottom: 14px;
 }
 
+.bookings-table-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .bookings-table-header h3 {
   margin: 0 0 4px;
   font-size: 0.98rem;
@@ -1556,6 +1564,41 @@ a {
   font-size: 0.9rem;
   line-height: 1.45;
   color: #a89d92;
+}
+
+.bookings-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bookings-date-control,
+.bookings-status-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #c8beb4;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.bookings-date-control svg {
+  color: #c8beb4;
+}
+
+.bookings-date-control input,
+.bookings-status-control select {
+  background: rgba(12, 12, 12, 0.45);
+  border: 1px solid rgba(255, 248, 240, 0.16);
+  color: #f7f2eb;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+}
+
+.bookings-status-control select {
+  min-width: 132px;
 }
 
 .bookings-table-scroll {
