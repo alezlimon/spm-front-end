@@ -67,6 +67,7 @@ export default function PropertyDetailPage() {
     return {
       total: rooms.length,
       available: rooms.filter((room) => room.status === 'Available').length,
+      occupied: rooms.filter((room) => room.status === 'Occupied').length,
       dirty: rooms.filter((room) => room.status === 'Dirty').length,
       maintenance: rooms.filter((room) => room.status === 'Maintenance').length
     };
@@ -98,7 +99,19 @@ export default function PropertyDetailPage() {
   }, [navigate, previousProperty, nextProperty]);
 
   const isHotel = property?.type === 'Hotel';
+  const isVilla = property?.type === 'Villa';
   const propertyImage = property ? propertyImageMap[property.name] || property.image : '';
+
+  const hotelOccupancyRate =
+    roomStats.total > 0 ? Math.round((roomStats.occupied / roomStats.total) * 100) : 0;
+
+  const villaReadiness = roomStats.dirty + roomStats.maintenance === 0 ? 'Ready' : 'Attention Needed';
+  const villaPrepStatus = roomStats.dirty > 0 ? 'Prep in progress' : roomStats.maintenance > 0 ? 'Blocked areas present' : 'Fully staged';
+
+  const recentGuestNames = rooms
+    .filter((room) => room.status === 'Occupied')
+    .slice(0, 3)
+    .map((room) => `${isVilla ? 'Suite' : 'Room'} ${room.roomNumber}`);
 
   if (loading) {
     return (
@@ -186,79 +199,257 @@ export default function PropertyDetailPage() {
         </div>
       </section>
 
-      <section className="property-detail-summary-grid">
-        <article className="property-detail-summary-card">
-          <span>{isHotel ? 'Total Rooms' : 'Rooms Configured'}</span>
-          <strong>{roomStats.total}</strong>
-        </article>
+      {isHotel && (
+        <>
+          <section className="property-detail-summary-grid">
+            <article className="property-detail-summary-card">
+              <span>Occupancy</span>
+              <strong>{hotelOccupancyRate}%</strong>
+            </article>
 
-        <article className="property-detail-summary-card">
-          <span>{isHotel ? 'Available' : 'Ready'}</span>
-          <strong>{roomStats.available}</strong>
-        </article>
+            <article className="property-detail-summary-card">
+              <span>Available Rooms</span>
+              <strong>{roomStats.available}</strong>
+            </article>
 
-        <article className="property-detail-summary-card">
-          <span>{isHotel ? 'Dirty' : 'Prep Needed'}</span>
-          <strong>{roomStats.dirty}</strong>
-        </article>
+            <article className="property-detail-summary-card">
+              <span>Dirty Rooms</span>
+              <strong>{roomStats.dirty}</strong>
+            </article>
 
-        <article className="property-detail-summary-card">
-          <span>{isHotel ? 'Maintenance' : 'Blocked'}</span>
-          <strong>{roomStats.maintenance}</strong>
-        </article>
-      </section>
+            <article className="property-detail-summary-card">
+              <span>Maintenance</span>
+              <strong>{roomStats.maintenance}</strong>
+            </article>
+          </section>
 
-      <section className="property-detail-section">
-        <div className="property-detail-section-header">
-          <h2>{isHotel ? 'Rooms' : 'Accommodation Setup'}</h2>
-          <p>
-            {isHotel
-              ? 'Operational room overview for this property.'
-              : 'Operational accommodation overview for this villa.'}
-          </p>
-        </div>
+          <section className="property-detail-section property-detail-ops-section">
+            <div className="property-detail-section-header">
+              <h2>Operations Snapshot</h2>
+              <p>Hotel-specific operational view for arrivals, departures, and room flow.</p>
+            </div>
 
-        <div className="property-detail-rooms-grid">
-          {rooms.length === 0 ? (
-            <p className="page-feedback">
-              {property.type === 'Villa'
-                ? 'No accommodation units are configured for this villa yet.'
-                : 'No rooms found for this property.'}
-            </p>
-          ) : (
-            rooms.map((room) => (
-              <article key={room._id} className="property-detail-room-card">
-                <div className="property-detail-room-top">
-                  <div>
-                    <h3>{isHotel ? `Room ${room.roomNumber}` : `Suite ${room.roomNumber}`}</h3>
-                    <p>{room.type}</p>
-                  </div>
-
-                  <span className={`status-badge status-${room.status.toLowerCase()}`}>
-                    {room.status}
-                  </span>
-                </div>
-
-                <div className="property-detail-room-meta">
-                  <div>
-                    <span>{isHotel ? 'Rate' : 'Nightly Rate'}</span>
-                    <strong>${room.pricePerNight}</strong>
-                  </div>
-
-                  <div>
-                    <span>Status</span>
-                    <strong>{room.status}</strong>
-                  </div>
-                </div>
-
-                {room.description && (
-                  <p className="property-detail-room-description">{room.description}</p>
-                )}
+            <div className="property-detail-ops-grid">
+              <article className="property-detail-ops-card">
+                <span>Occupied Rooms</span>
+                <strong>{roomStats.occupied}</strong>
+                <p>Currently checked in or in active guest use.</p>
               </article>
-            ))
-          )}
-        </div>
-      </section>
+
+              <article className="property-detail-ops-card">
+                <span>Expected Arrivals</span>
+                <strong>{Math.max(1, Math.ceil(roomStats.available / 3))}</strong>
+                <p>Forecasted based on current availability pattern.</p>
+              </article>
+
+              <article className="property-detail-ops-card">
+                <span>Expected Departures</span>
+                <strong>{Math.max(1, Math.ceil(roomStats.occupied / 2))}</strong>
+                <p>Likely turnover pressure for the next housekeeping cycle.</p>
+              </article>
+
+              <article className="property-detail-ops-card">
+                <span>Operational Alerts</span>
+                <strong>{roomStats.dirty + roomStats.maintenance}</strong>
+                <p>Dirty and maintenance rooms requiring attention.</p>
+              </article>
+            </div>
+          </section>
+
+          <section className="property-detail-section">
+            <div className="property-detail-section-header">
+              <h2>Rooms</h2>
+              <p>Operational room overview for this property.</p>
+            </div>
+
+            <div className="property-detail-rooms-grid">
+              {rooms.length === 0 ? (
+                <p className="page-feedback">No rooms found for this property.</p>
+              ) : (
+                rooms.map((room) => (
+                  <article key={room._id} className="property-detail-room-card">
+                    <div className="property-detail-room-top">
+                      <div>
+                        <h3>Room {room.roomNumber}</h3>
+                        <p>{room.type}</p>
+                      </div>
+
+                      <span className={`status-badge status-${room.status.toLowerCase()}`}>
+                        {room.status}
+                      </span>
+                    </div>
+
+                    <div className="property-detail-room-meta">
+                      <div>
+                        <span>Rate</span>
+                        <strong>${room.pricePerNight}</strong>
+                      </div>
+
+                      <div>
+                        <span>Status</span>
+                        <strong>{room.status}</strong>
+                      </div>
+                    </div>
+
+                    {room.description && (
+                      <p className="property-detail-room-description">{room.description}</p>
+                    )}
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
+        </>
+      )}
+
+      {isVilla && (
+        <>
+          <section className="property-detail-summary-grid">
+            <article className="property-detail-summary-card">
+              <span>Booking Status</span>
+              <strong>{property.status}</strong>
+            </article>
+
+            <article className="property-detail-summary-card">
+              <span>Readiness</span>
+              <strong>{villaReadiness}</strong>
+            </article>
+
+            <article className="property-detail-summary-card">
+              <span>Prep Status</span>
+              <strong>{villaPrepStatus}</strong>
+            </article>
+
+            <article className="property-detail-summary-card">
+              <span>Configured Suites</span>
+              <strong>{roomStats.total}</strong>
+            </article>
+          </section>
+
+          <section className="property-detail-section property-detail-ops-section">
+            <div className="property-detail-section-header">
+              <h2>Villa Operations</h2>
+              <p>Villa-specific readiness, guest flow, and house prep overview.</p>
+            </div>
+
+            <div className="property-detail-ops-grid">
+              <article className="property-detail-ops-card">
+                <span>Guest Presence</span>
+                <strong>{roomStats.occupied > 0 ? 'In House' : 'No Current Stay'}</strong>
+                <p>
+                  {roomStats.occupied > 0
+                    ? `Active occupancy across ${roomStats.occupied} suite${roomStats.occupied > 1 ? 's' : ''}.`
+                    : 'No active in-house guest occupancy right now.'}
+                </p>
+              </article>
+
+              <article className="property-detail-ops-card">
+                <span>Housekeeping</span>
+                <strong>{roomStats.dirty > 0 ? `${roomStats.dirty} Open` : 'Clear'}</strong>
+                <p>Prep and turnover workload across the estate.</p>
+              </article>
+
+              <article className="property-detail-ops-card">
+                <span>Concierge Notes</span>
+                <strong>{property.status === 'Booked' ? 'Arrival Active' : 'Standby'}</strong>
+                <p>
+                  {property.status === 'Booked'
+                    ? 'Guest-facing support and pre-arrival coordination should stay active.'
+                    : 'No major guest-facing concierge escalation visible.'}
+                </p>
+              </article>
+
+              <article className="property-detail-ops-card">
+                <span>Active Zones</span>
+                <strong>{roomStats.total - roomStats.maintenance}</strong>
+                <p>Suites or operational areas currently not blocked by maintenance.</p>
+              </article>
+            </div>
+          </section>
+
+          <section className="property-detail-section">
+            <div className="property-detail-section-header">
+              <h2>Accommodation Setup</h2>
+              <p>Operational accommodation overview for this villa.</p>
+            </div>
+
+            <div className="property-detail-rooms-grid">
+              {rooms.length === 0 ? (
+                <p className="page-feedback">
+                  No accommodation units are configured for this villa yet.
+                </p>
+              ) : (
+                rooms.map((room) => (
+                  <article key={room._id} className="property-detail-room-card">
+                    <div className="property-detail-room-top">
+                      <div>
+                        <h3>Suite {room.roomNumber}</h3>
+                        <p>{room.type}</p>
+                      </div>
+
+                      <span className={`status-badge status-${room.status.toLowerCase()}`}>
+                        {room.status}
+                      </span>
+                    </div>
+
+                    <div className="property-detail-room-meta">
+                      <div>
+                        <span>Nightly Rate</span>
+                        <strong>${room.pricePerNight}</strong>
+                      </div>
+
+                      <div>
+                        <span>Status</span>
+                        <strong>{room.status}</strong>
+                      </div>
+                    </div>
+
+                    {room.description && (
+                      <p className="property-detail-room-description">{room.description}</p>
+                    )}
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="property-detail-section">
+            <div className="property-detail-section-header">
+              <h2>Stay Notes</h2>
+              <p>High-level guest and readiness notes for villa management.</p>
+            </div>
+
+            <div className="property-detail-notes-list">
+              <article className="property-detail-note-card">
+                <span>Guest Info</span>
+                <p>
+                  {recentGuestNames.length > 0
+                    ? `Current stay activity is centered around ${recentGuestNames.join(', ')}.`
+                    : 'No in-house guest activity detected from the current room set.'}
+                </p>
+              </article>
+
+              <article className="property-detail-note-card">
+                <span>Housekeeping</span>
+                <p>
+                  {roomStats.dirty > 0
+                    ? `${roomStats.dirty} suite${roomStats.dirty > 1 ? 's are' : ' is'} still in prep and should be reviewed before next arrival.`
+                    : 'Housekeeping load appears clear across the configured suites.'}
+                </p>
+              </article>
+
+              <article className="property-detail-note-card">
+                <span>Estate Readiness</span>
+                <p>
+                  {roomStats.maintenance > 0
+                    ? `${roomStats.maintenance} blocked area${roomStats.maintenance > 1 ? 's are' : ' is'} affecting full-estate readiness.`
+                    : 'No blocked operational areas are visible right now.'}
+                </p>
+              </article>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }
