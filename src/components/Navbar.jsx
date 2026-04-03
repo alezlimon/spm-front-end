@@ -66,29 +66,9 @@ export default function Navbar() {
           Reva
         </NavLink>
 
-        <div style={rightSideStyle}>
-          <div style={navLinksStyle}>
-            <NavLink to="/properties" style={getLinkStyle}>
-              Properties
-            </NavLink>
-
-            <NavLink to="/guests" style={getLinkStyle}>
-              Guests
-            </NavLink>
-
-            <NavLink to="/rooms" style={getLinkStyle}>
-              Rooms
-            </NavLink>
-
-            <NavLink to="/bookings" style={getLinkStyle}>
-              Bookings
-            </NavLink>
-          </div>
-
-          <NavLink to="/" style={logoutStyle}>
-            Log out
-          </NavLink>
-        </div>
+        <NavLink to="/" style={logoutStyle}>
+          Log out
+        </NavLink>
       </div>
     </nav>
   );

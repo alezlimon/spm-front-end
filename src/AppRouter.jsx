@@ -1,11 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import GuestsPage from './components/GuestsPage';
 import RoomsPage from './components/RoomsPage';
 import BookingsPage from './components/BookingsPage';
 import AuthPage from './components/AuthPage';
 import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
-import PropertyDetailPage from './components/PropertyDetailPage';
+import PropertyLayout from './components/PropertyLayout';
 
 function AppLayout() {
   const location = useLocation();
@@ -17,10 +17,12 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<AuthPage />} />
         <Route path="/properties" element={<PropertiesPage />} />
-        <Route path="/properties/:propertyId" element={<PropertyDetailPage />} />
-        <Route path="/guests" element={<GuestsPage />} />
-        <Route path="/rooms" element={<RoomsPage />} />
-        <Route path="/bookings" element={<BookingsPage />} />
+        <Route path="/properties/:propertyId" element={<PropertyLayout />}>
+          <Route index element={<Navigate to="rooms" replace />} />
+          <Route path="rooms" element={<RoomsPage />} />
+          <Route path="bookings" element={<BookingsPage />} />
+          <Route path="guests" element={<GuestsPage />} />
+        </Route>
       </Routes>
     </>
   );

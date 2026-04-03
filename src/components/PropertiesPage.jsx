@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { PROPERTIES } from '../propertiesConfig';
 import '../App.css';
 
 import alpineHouseImage from '../assets/properties/Property Images/Alpine House.png';
@@ -9,8 +9,6 @@ import riadNoirImage from '../assets/properties/Property Images/Riad Noir.png';
 import villaAzureImage from '../assets/properties/Property Images/Villa Azure.png';
 import villaMiradorImage from '../assets/properties/Property Images/Villa Mirador.png';
 import villaSoleneImage from '../assets/properties/Property Images/Villa Solene.png';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 const propertyImageMap = {
   'Alpine House': alpineHouseImage,
@@ -25,34 +23,6 @@ const propertyImageMap = {
 export default function PropertiesPage() {
   const navigate = useNavigate();
 
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchProperties = async () => {
-      setLoading(true);
-      setError('');
-
-      try {
-        const res = await fetch(`${API_URL}/properties`);
-
-        if (!res.ok) {
-          throw new Error('Error fetching properties');
-        }
-
-        const data = await res.json();
-        setProperties(data);
-      } catch (err) {
-        setError('Could not load properties');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, []);
-
   const handleOpenProperty = (propertyId) => {
     navigate(`/properties/${propertyId}`);
   };
@@ -63,17 +33,13 @@ export default function PropertiesPage() {
         <div className="properties-page-heading-block properties-page-heading-block-minimal">
           <h1>Properties</h1>
           <p className="properties-page-meta properties-page-meta-minimal">
-            Portfolio · {properties.length} properties
+            Portfolio · {PROPERTIES.length} properties
           </p>
         </div>
       </header>
 
-      {loading && <p className="page-feedback">Loading properties...</p>}
-      {error && <p className="page-feedback page-feedback-error">{error}</p>}
-
-      {!loading && !error && (
-        <div className="properties-grid properties-grid-compact">
-          {properties.map((property) => {
+      <div className="properties-grid properties-grid-compact">
+        {PROPERTIES.map((property) => {
             const propertyImage = propertyImageMap[property.name] || property.image;
 
             return (
@@ -114,9 +80,8 @@ export default function PropertiesPage() {
                 </div>
               </article>
             );
-          })}
-        </div>
-      )}
+        })}
+      </div>
     </div>
   );
 }
