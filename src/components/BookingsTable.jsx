@@ -22,7 +22,7 @@ const toInputDate = (dateValue = new Date()) => {
 
 const normalizeStatus = (status) => (status || '').toLowerCase();
 
-export default function BookingsTable() {
+export default function BookingsTable({ refreshKey }) {
   const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(toInputDate());
@@ -67,7 +67,7 @@ export default function BookingsTable() {
     };
 
     fetchBookings();
-  }, [propertyId]);
+  }, [propertyId, refreshKey]);
 
   const formatDate = (dateValue) => {
     if (!dateValue) return '—';

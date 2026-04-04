@@ -1788,3 +1788,546 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* BOOKINGS PAGE HEADER ROW */
+.bookings-page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bookings-page-header-row h1 {
+  margin: 0 0 8px;
+}
+
+.bookings-page-header-row p {
+  margin: 0;
+}
+
+/* NEW BOOKING MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-panel {
+  background: #16191e;
+  border: 1px solid rgba(255, 248, 240, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255, 248, 240, 0.08);
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f5efe7;
+}
+
+.modal-steps {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.modal-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #6a6560;
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+}
+
+.modal-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 248, 240, 0.06);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: #6a6560;
+  flex-shrink: 0;
+}
+
+.modal-step-active {
+  color: #f5efe7;
+  border-color: rgba(255, 248, 240, 0.12);
+  background: rgba(255, 248, 240, 0.04);
+}
+
+.modal-step-active .modal-step-num {
+  background: #d4a85d;
+  color: #111;
+}
+
+.modal-step-done {
+  color: #a89d92;
+}
+
+.modal-step-done .modal-step-num {
+  background: rgba(100, 200, 130, 0.18);
+  color: #6fcc90;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #a89d92;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 8px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 248, 240, 0.06);
+  color: #f5efe7;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-top: 1px solid rgba(255, 248, 240, 0.08);
+  flex-shrink: 0;
+}
+
+.modal-date-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.modal-field > span {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #a89d92;
+  letter-spacing: 0.04em;
+}
+
+.modal-field input,
+.modal-field select {
+  background: rgba(12, 12, 12, 0.45);
+  border: 1px solid rgba(255, 248, 240, 0.14);
+  color: #f7f2eb;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.modal-field input:focus {
+  border-color: rgba(212, 168, 93, 0.45);
+}
+
+.modal-nights {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #d4a85d;
+  background: rgba(212, 168, 93, 0.1);
+  border: 1px solid rgba(212, 168, 93, 0.22);
+  border-radius: 20px;
+  padding: 5px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+.modal-section-label {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #a89d92;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.modal-rooms-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.modal-room-card {
+  background: rgba(255, 248, 240, 0.03);
+  border: 1px solid rgba(255, 248, 240, 0.1);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.14s ease, background 0.14s ease;
+  color: #f5efe7;
+}
+
+.modal-room-card:hover {
+  border-color: rgba(255, 248, 240, 0.2);
+  background: rgba(255, 248, 240, 0.05);
+}
+
+.modal-room-card-selected {
+  border-color: #d4a85d;
+  background: rgba(212, 168, 93, 0.08);
+}
+
+.modal-room-number {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f5efe7;
+}
+
+.modal-room-type {
+  font-size: 0.76rem;
+  color: #a89d92;
+  margin-bottom: 4px;
+}
+
+.modal-room-price {
+  font-size: 0.76rem;
+  color: #c8beb4;
+}
+
+.modal-room-total {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #d4a85d;
+}
+
+.modal-pricing-summary {
+  background: rgba(255, 248, 240, 0.03);
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-pricing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #c8beb4;
+}
+
+.modal-pricing-row strong {
+  color: #f5efe7;
+  font-weight: 600;
+}
+
+.modal-pricing-breakfast {
+  color: #8ec99e;
+}
+
+.modal-breakfast-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255, 248, 240, 0.02);
+  border: 1px solid rgba(255, 248, 240, 0.1);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.14s ease, background 0.14s ease;
+  color: #f5efe7;
+}
+
+.modal-breakfast-toggle:hover {
+  border-color: rgba(255, 248, 240, 0.2);
+}
+
+.modal-breakfast-toggle-on {
+  border-color: rgba(100, 180, 120, 0.38);
+  background: rgba(100, 180, 120, 0.06);
+}
+
+.modal-breakfast-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.modal-breakfast-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.modal-breakfast-label strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f5efe7;
+}
+
+.modal-breakfast-label small {
+  font-size: 0.76rem;
+  color: #a89d92;
+}
+
+.modal-breakfast-check {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 248, 240, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #a89d92;
+  flex-shrink: 0;
+}
+
+.modal-breakfast-check-on {
+  background: rgba(100, 180, 120, 0.18);
+  border-color: rgba(100, 180, 120, 0.48);
+  color: #6fcc90;
+}
+
+.modal-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f5efe7;
+  padding: 14px 18px;
+  background: rgba(212, 168, 93, 0.06);
+  border: 1px solid rgba(212, 168, 93, 0.16);
+  border-radius: 14px;
+}
+
+.modal-total-row strong {
+  color: #d4a85d;
+  font-size: 1.18rem;
+}
+
+.modal-guest-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 248, 240, 0.08);
+}
+
+.modal-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #a89d92;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.14s ease, border-color 0.14s ease;
+}
+
+.modal-tab:hover {
+  color: #f5efe7;
+}
+
+.modal-tab-active {
+  color: #f5efe7;
+  border-bottom-color: #d4a85d;
+  font-weight: 600;
+}
+
+.modal-guest-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-search-input {
+  background: rgba(12, 12, 12, 0.45);
+  border: 1px solid rgba(255, 248, 240, 0.14);
+  color: #f7f2eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.modal-search-input:focus {
+  border-color: rgba(212, 168, 93, 0.45);
+}
+
+.modal-search-results {
+  background: #1a1e24;
+  border: 1px solid rgba(255, 248, 240, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.modal-search-result-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255, 248, 240, 0.06);
+  text-align: left;
+  cursor: pointer;
+  color: #f5efe7;
+  font-size: 0.88rem;
+  transition: background 0.12s ease;
+}
+
+.modal-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.modal-search-result-item:hover {
+  background: rgba(255, 248, 240, 0.05);
+}
+
+.modal-search-result-item small {
+  font-size: 0.76rem;
+  color: #a89d92;
+}
+
+.modal-guest-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(212, 168, 93, 0.08);
+  border: 1px solid rgba(212, 168, 93, 0.2);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  color: #f5efe7;
+}
+
+.modal-guest-selected small {
+  color: #a89d92;
+  flex: 1;
+}
+
+.modal-guest-clear {
+  background: none;
+  border: none;
+  color: #a89d92;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.12s ease;
+}
+
+.modal-guest-clear:hover {
+  color: #f5efe7;
+}
+
+.modal-guest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.modal-required-note {
+  font-size: 0.72rem;
+  color: #a89d92;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.modal-companion-toggle {
+  background: none;
+  border: 1px dashed rgba(255, 248, 240, 0.14);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: #a89d92;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.14s ease, color 0.14s ease;
+}
+
+.modal-companion-toggle:hover {
+  border-color: rgba(255, 248, 240, 0.26);
+  color: #f5efe7;
+}
+
+.modal-companion-toggle-on {
+  border-color: rgba(184, 100, 100, 0.28);
+  color: #e0a8a8;
+}
