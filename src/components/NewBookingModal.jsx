@@ -212,8 +212,8 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         body: JSON.stringify({
           room: selectedRoom._id,
           guest: guestId,
-          checkInDate: checkIn,
-          checkOutDate: checkOut,
+          checkIn,
+          checkOut,
           status: 'confirmed',
           breakfastIncluded: breakfast,
           totalPrice: total,
