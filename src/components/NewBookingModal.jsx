@@ -133,7 +133,24 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
       return 'Session expired - please log in again';
     }
     if (status === 400) {
-      return data?.message || 'Invalid data provided';
+      if (typeof data?.message === 'string' && data.message.trim()) {
+        return data.message;
+      }
+      if (typeof data?.error === 'string' && data.error.trim()) {
+        return data.error;
+      }
+      if (Array.isArray(data?.details) && data.details.length > 0) {
+        const detail = data.details[0];
+        if (typeof detail === 'string') return detail;
+        if (detail?.msg) return detail.msg;
+      }
+      if (Array.isArray(data?.errors) && data.errors.length > 0) {
+        const firstError = data.errors[0];
+        if (typeof firstError === 'string') return firstError;
+        if (firstError?.message) return firstError.message;
+        if (firstError?.msg) return firstError.msg;
+      }
+      return 'Invalid data provided';
     }
     return data?.message || 'Request failed';
   };
@@ -183,6 +200,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         room: selectedRoom._id,
         checkIn,
         checkOut,
+        numberOfGuests: hasCompanion ? 2 : 1,
         status: 'confirmed',
         breakfastIncluded: breakfast,
         totalPrice: total,
