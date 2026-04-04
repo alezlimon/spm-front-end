@@ -73,12 +73,12 @@ function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
           <div className="room-card-booking-dates">
             <div className="room-detail-item">
               <span>Check-In</span>
-              <strong>{formatDate(currentBooking.checkInDate)}</strong>
+              <strong>{formatDate(currentBooking.checkIn || currentBooking.checkInDate)}</strong>
             </div>
 
             <div className="room-detail-item">
               <span>Check-Out</span>
-              <strong>{formatDate(currentBooking.checkOutDate)}</strong>
+              <strong>{formatDate(currentBooking.checkOut || currentBooking.checkOutDate)}</strong>
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ const getEntityId = (value) => {
   return value._id || value.id || null;
 };
 
-const toInputDate = (dateValue = new Date()) => {
+const toInputDate = (dateValue) => {
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return '';
 
@@ -25,7 +25,7 @@ const normalizeStatus = (status) => (status || '').toLowerCase();
 export default function BookingsTable({ refreshKey }) {
   const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(toInputDate());
+  const [selectedDate, setSelectedDate] = useState(() => toInputDate(new Date()));
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -98,7 +98,7 @@ export default function BookingsTable({ refreshKey }) {
   };
 
   const filteredBookings = bookings.filter((booking) => {
-    const bookingCheckIn = toInputDate(booking.checkInDate);
+    const bookingCheckIn = toInputDate(booking.checkIn || booking.checkInDate);
     const matchesDate = bookingCheckIn === selectedDate;
 
     if (!matchesDate) {
@@ -189,8 +189,8 @@ export default function BookingsTable({ refreshKey }) {
                   <td className="booking-reference">{booking._id.slice(-6).toUpperCase()}</td>
                   <td>{getGuestName(booking)}</td>
                   <td>{getRoomLabel(booking)}</td>
-                  <td>{formatDate(booking.checkInDate)}</td>
-                  <td>{formatDate(booking.checkOutDate)}</td>
+                  <td>{formatDate(booking.checkIn || booking.checkInDate)}</td>
+                  <td>{formatDate(booking.checkOut || booking.checkOutDate)}</td>
                   <td>
                     <span className={`status-badge ${getStatusClass(booking.status)}`}>
                       {booking.status || 'Unknown'}
