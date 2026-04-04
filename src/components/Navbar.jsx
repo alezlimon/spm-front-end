@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const navStyle = {
   background: '#050608',
@@ -27,38 +28,27 @@ const brandStyle = {
   letterSpacing: '-0.04em'
 };
 
-const rightSideStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '28px'
-};
-
-const navLinksStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '28px',
-  flexWrap: 'wrap'
-};
-
 const logoutStyle = {
   color: 'rgba(245, 247, 250, 0.72)',
   textDecoration: 'none',
   fontWeight: 500,
   fontSize: '0.88rem',
   letterSpacing: '0.01em',
-  transition: 'color 0.18s ease'
+  transition: 'color 0.18s ease',
+  background: 'transparent',
+  border: 'none',
+  cursor: 'pointer'
 };
 
-const getLinkStyle = ({ isActive }) => ({
-  color: isActive ? '#FFFFFF' : 'rgba(245, 247, 250, 0.64)',
-  textDecoration: 'none',
-  fontWeight: isActive ? 600 : 500,
-  fontSize: '0.93rem',
-  letterSpacing: '0.01em',
-  transition: 'color 0.18s ease'
-});
-
 export default function Navbar() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav style={navStyle}>
       <div style={navInnerStyle}>
@@ -66,9 +56,9 @@ export default function Navbar() {
           Reva
         </NavLink>
 
-        <NavLink to="/" style={logoutStyle}>
+        <button type="button" style={logoutStyle} onClick={handleLogout}>
           Log out
-        </NavLink>
+        </button>
       </div>
     </nav>
   );

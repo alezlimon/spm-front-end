@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import EditGuestForm from './EditGuestForm';
 import '../App.css';
+import { getAuthHeaders } from '../utils/auth';
 
 export default function GuestList({ guests, onGuestUpdated }) {
   const [editingId, setEditingId] = useState(null);
@@ -17,7 +18,7 @@ export default function GuestList({ guests, onGuestUpdated }) {
 
     const res = await fetch(`${API_URL}/guests/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(updatedData)
     });
 

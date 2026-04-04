@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import GuestSelector from './GuestSelector';
+import { getAuthHeaders } from '../utils/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
@@ -17,7 +18,7 @@ export default function AssignGuestToBooking({ bookingId, onSuccess }) {
     try {
       const res = await fetch(`${API_URL}/bookings/${bookingId}/assign-guest`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ guestId })
       });
       if (!res.ok) throw new Error('Could not assign guest');

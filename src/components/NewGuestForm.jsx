@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../App.css';
+import { getAuthHeaders } from '../utils/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
@@ -52,7 +53,7 @@ function NewGuestForm({ onGuestCreated }) {
     try {
       const res = await fetch(`${API_URL}/guests`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(form)
       });
 

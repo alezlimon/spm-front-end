@@ -7,18 +7,34 @@ import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
 import PropertyLayout from './components/PropertyLayout';
 import PropertyOverviewPage from './components/PropertyOverviewPage';
+import { useAuth } from './context/AuthContext';
+
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="app"><p className="page-feedback">Loading session...</p></div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
 
 function AppLayout() {
   const location = useLocation();
-  const showNavbar = location.pathname !== '/';
+  const { isAuthenticated, isLoading } = useAuth();
+  const showNavbar = location.pathname !== '/' && isAuthenticated && !isLoading;
 
   return (
     <>
       {showNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<AuthPage />} />
-        <Route path="/properties" element={<PropertiesPage />} />
-        <Route path="/properties/:propertyId" element={<PropertyLayout />}>
+        <Route path="/" element={isAuthenticated ? <Navigate to="/properties" replace /> : <AuthPage />} />
+        <Route path="/properties" element={<ProtectedRoute><PropertiesPage /></ProtectedRoute>} />
+        <Route path="/properties/:propertyId" element={<ProtectedRoute><PropertyLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<PropertyOverviewPage />} />
           <Route path="rooms" element={<RoomsPage />} />
