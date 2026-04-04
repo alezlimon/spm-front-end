@@ -155,35 +155,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
     setSubmitting(true);
     try {
-      let guestId;
-
-      if (guestTab === 'new') {
-        const body = { ...newGuest };
-        if (!body.phone) delete body.phone;
-        const res = await fetch(`${API_URL}/guests`, {
-          method: 'POST',
-          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(body),
-        });
-
-        let guestData;
-        try {
-          guestData = await res.json();
-        } catch {
-          throw new Error('Invalid response from server');
-        }
-
-        if (!res.ok) {
-          throw new Error(parseErrorMessage(res.status, guestData));
-        }
-        guestId = guestData._id || guestData.guest?._id;
-        if (!guestId) {
-          throw new Error('Could not retrieve guest ID');
-        }
-      } else {
-        guestId = selectedGuest._id;
-      }
-
+      // Create companion if provided
       if (hasCompanion) {
         const compBody = { ...companion };
         if (!compBody.email) delete compBody.email;
@@ -206,18 +178,29 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         }
       }
 
+      // Build booking payload
+      const bookingPayload = {
+        room: selectedRoom._id,
+        checkIn,
+        checkOut,
+        status: 'confirmed',
+        breakfastIncluded: breakfast,
+        totalPrice: total,
+      };
+
+      // Add guest reference
+      if (guestTab === 'new') {
+        const primaryGuestData = { ...newGuest };
+        if (!primaryGuestData.phone) delete primaryGuestData.phone;
+        bookingPayload.primaryGuest = primaryGuestData;
+      } else {
+        bookingPayload.guestId = selectedGuest._id;
+      }
+
       const bookingRes = await fetch(`${API_URL}/bookings`, {
         method: 'POST',
         headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({
-          room: selectedRoom._id,
-          guest: guestId,
-          checkIn,
-          checkOut,
-          status: 'confirmed',
-          breakfastIncluded: breakfast,
-          totalPrice: total,
-        }),
+        body: JSON.stringify(bookingPayload),
       });
 
       let bookingData;
