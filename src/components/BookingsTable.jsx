@@ -99,7 +99,11 @@ export default function BookingsTable({ refreshKey }) {
 
   const filteredBookings = bookings.filter((booking) => {
     const bookingCheckIn = toInputDate(booking.checkIn || booking.checkInDate);
-    const matchesDate = bookingCheckIn === selectedDate;
+    const bookingCheckOut = toInputDate(booking.checkOut || booking.checkOutDate);
+    const hasValidRange = Boolean(bookingCheckIn && bookingCheckOut);
+    const matchesDate = hasValidRange
+      ? selectedDate >= bookingCheckIn && selectedDate <= bookingCheckOut
+      : false;
 
     if (!matchesDate) {
       return false;
