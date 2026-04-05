@@ -1,5 +1,7 @@
 import { apiRequest } from './client';
 
+const MAX_ALL_BOOKINGS_PAGES = 50;
+
 const toPositiveNumber = (value, fallback) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
@@ -71,15 +73,47 @@ const normalizeBookingsPage = (payload, params = {}) => {
   };
 };
 
-export async function listBookings() {
-  const data = await apiRequest('/bookings');
+export async function listBookings(options = {}) {
+  const data = await apiRequest('/bookings', options);
   return Array.isArray(data) ? data : [];
 }
 
-export async function listBookingsPage(params = {}) {
+export async function listBookingsPage(params = {}, options = {}) {
   const queryString = buildBookingsQuery(params);
-  const data = await apiRequest(`/bookings${queryString}`);
+  const data = await apiRequest(`/bookings${queryString}`, options);
   return normalizeBookingsPage(data, params);
+}
+
+export async function listAllBookings(params = {}, options = {}) {
+  const firstPage = await listBookingsPage(
+    {
+      ...params,
+      page: 1
+    },
+    options
+  );
+
+  if (!firstPage.isServerPaginated || firstPage.totalPages <= 1) {
+    return firstPage.items || [];
+  }
+
+  let allItems = [...(firstPage.items || [])];
+  const cappedTotalPages = Math.min(firstPage.totalPages, MAX_ALL_BOOKINGS_PAGES);
+
+  for (let page = 2; page <= cappedTotalPages; page += 1) {
+    const pageResult = await listBookingsPage(
+      {
+        ...params,
+        page,
+        limit: firstPage.limit
+      },
+      options
+    );
+
+    allItems = allItems.concat(pageResult.items || []);
+  }
+
+  return allItems;
 }
 
 export async function getBookingById(bookingId) {

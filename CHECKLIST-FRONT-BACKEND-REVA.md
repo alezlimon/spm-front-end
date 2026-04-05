@@ -104,6 +104,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Estados de carga por fila para evitar bloqueos globales en acciones operativas.
 - [x] Flujo de booking detail con acciones operativas unificadas y mensajes consistentes.
 - [x] Tabla de bookings preparada para filtros/paginacion server-side con fallback cliente.
+- [x] Proteccion contra respuestas obsoletas en bookings table (abort + stale guard).
 
 ## 10) Siguiente bloque FE (sin bloqueo)
 
@@ -112,3 +113,4 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [ ] Remover fallback de traduccion FE tras validacion de staging (2026-04-12).
 - [x] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
 - [ ] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).
+- [x] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).

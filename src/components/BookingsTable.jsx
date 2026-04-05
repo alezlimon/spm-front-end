@@ -31,6 +31,8 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [actionFeedbackById, setActionFeedbackById] = useState({});
   const [recentActionErrors, setRecentActionErrors] = useState([]);
   const feedbackTimeoutsRef = useRef({});
+  const requestSequenceRef = useRef(0);
+  const activeRequestControllerRef = useRef(null);
 
   const setRowFeedback = (bookingId, feedback) => {
     if (feedbackTimeoutsRef.current[bookingId]) {
@@ -81,6 +83,16 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   };
 
   const fetchBookings = useCallback(async () => {
+    const requestSequence = requestSequenceRef.current + 1;
+    requestSequenceRef.current = requestSequence;
+
+    if (activeRequestControllerRef.current) {
+      activeRequestControllerRef.current.abort();
+    }
+
+    const requestController = new AbortController();
+    activeRequestControllerRef.current = requestController;
+
     setLoading(true);
     setError('');
 
@@ -88,8 +100,12 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       if (propertyId) {
         const [roomsData, bookingsData] = await Promise.all([
           listPropertyRooms(propertyId),
-          listBookings()
+          listBookings({ signal: requestController.signal })
         ]);
+
+        if (requestSequenceRef.current !== requestSequence) {
+          return;
+        }
 
         const roomIds = new Set((roomsData || []).map((room) => room._id));
         const scopedBookings = (bookingsData || []).filter((booking) => {
@@ -107,7 +123,13 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
           date: selectedDate,
           page: currentPage,
           limit: DEFAULT_PAGE_SIZE
+        }, {
+          signal: requestController.signal
         });
+
+        if (requestSequenceRef.current !== requestSequence) {
+          return;
+        }
 
         setBookings(bookingsPage.items || []);
         setIsServerPaginated(Boolean(bookingsPage.isServerPaginated));
@@ -115,9 +137,23 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
         setTotalPages(Math.max(1, bookingsPage.totalPages || 1));
       }
     } catch (err) {
+      if (err?.name === 'AbortError') {
+        return;
+      }
+
+      if (requestSequenceRef.current !== requestSequence) {
+        return;
+      }
+
       setError(err.message || 'Error fetching bookings');
     } finally {
-      setLoading(false);
+      if (requestSequenceRef.current === requestSequence) {
+        setLoading(false);
+      }
+
+      if (activeRequestControllerRef.current === requestController) {
+        activeRequestControllerRef.current = null;
+      }
     }
   }, [currentPage, propertyId, selectedDate, statusFilter]);
 
@@ -134,6 +170,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       const activeTimeouts = Object.values(feedbackTimeoutsRef.current);
       activeTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
       feedbackTimeoutsRef.current = {};
+
+      if (activeRequestControllerRef.current) {
+        activeRequestControllerRef.current.abort();
+        activeRequestControllerRef.current = null;
+      }
     };
   }, []);
 

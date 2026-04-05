@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { listBookings } from '../api/bookingsApi';
+import { listAllBookings } from '../api/bookingsApi';
 import { listGuests } from '../api/guestsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { ErrorState, LoadingState } from './PageState';
@@ -74,7 +74,7 @@ export default function GuestsPage() {
       try {
         const [roomsData, bookingsData] = await Promise.all([
           listPropertyRooms(propertyId),
-          listBookings()
+          listAllBookings()
         ]);
 
         const roomIds = new Set((roomsData || []).map((room) => room._id));

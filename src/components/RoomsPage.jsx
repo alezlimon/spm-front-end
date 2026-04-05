@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { listBookings } from '../api/bookingsApi';
+import { listAllBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms, updateRoom } from '../api/roomsApi';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
@@ -24,7 +24,7 @@ export default function RoomsPage() {
       try {
         const [roomsData, bookingsData] = await Promise.all([
           propertyId ? listPropertyRooms(propertyId) : listRooms(),
-          listBookings()
+          listAllBookings()
         ]);
 
         setRooms(roomsData);
