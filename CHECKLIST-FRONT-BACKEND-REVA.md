@@ -13,8 +13,8 @@ Objetivo: cerrar integracion FE-BE minimizando logica en frontend y centralizand
 
 ### Auth
 - [ ] Confirmar ruta canonica unica para auth (`/auth/*` o `/api/auth/*`).
-- [ ] Mantener estable `POST /auth/login` y `GET /auth/verify`.
-- [ ] Definir respuesta de error consistente en login/verify.
+- [x] Mantener estable `POST /auth/login` y `GET /auth/verify`.
+- [x] Definir respuesta de error consistente en login/verify.
 
 ### Errores (critico)
 - [x] Definir envelope unico de error para endpoints prioritarios:
@@ -88,3 +88,20 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Sync diario corto FE-BE para bloqueantes.
 - [x] Backend compartio DoD de errores para endpoints prioritarios (2026-04-05).
 - [ ] Revalidar en staging y remover fallback de traduccion FE (objetivo: 2026-04-12).
+
+## 9) Frontend ya entregado
+
+- [x] Capa API centralizada (`src/api/*`) y normalizacion de errores.
+- [x] Guard global de sesion expirada por 401 con token.
+- [x] Estados UX consistentes (loading/error/empty) en vistas core.
+- [x] Tabla de bookings con accion `View` conectada a detalle real.
+- [x] Booking detail con datos canonicos (`GET /api/bookings/:id` autenticado).
+- [x] Acciones operativas en booking detail: check-in, check-out, assign guest.
+- [x] Refresco automatico del detalle despues de mutaciones.
+- [x] Quick actions de check-in/check-out en bookings table con guardas por estado.
+
+## 10) Siguiente bloque FE (sin bloqueo)
+
+- [ ] Robustecer feedback en quick actions (success/error por fila en tabla).
+- [ ] Homogeneizar estilos de botones operativos en bookings y room history.
+- [ ] Remover fallback de traduccion FE tras validacion de staging (2026-04-12).

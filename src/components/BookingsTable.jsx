@@ -24,7 +24,7 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [actionLoadingId, setActionLoadingId] = useState(null);
-  const [actionError, setActionError] = useState('');
+  const [actionFeedbackById, setActionFeedbackById] = useState({});
 
   const fetchBookings = useCallback(async () => {
     setLoading(true);
@@ -56,13 +56,26 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
   const handleQuickCheckIn = async (bookingId) => {
     setActionLoadingId(bookingId);
-    setActionError('');
+    setActionFeedbackById((prev) => ({
+      ...prev,
+      [bookingId]: null
+    }));
 
     try {
       await checkInBooking(bookingId);
       await fetchBookings();
+      setActionFeedbackById((prev) => ({
+        ...prev,
+        [bookingId]: { type: 'success', message: 'Checked in successfully.' }
+      }));
     } catch (err) {
-      setActionError(err.message || 'Could not check in booking');
+      setActionFeedbackById((prev) => ({
+        ...prev,
+        [bookingId]: {
+          type: 'error',
+          message: err.message || 'Could not check in booking'
+        }
+      }));
     } finally {
       setActionLoadingId(null);
     }
@@ -70,13 +83,26 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
   const handleQuickCheckOut = async (bookingId) => {
     setActionLoadingId(bookingId);
-    setActionError('');
+    setActionFeedbackById((prev) => ({
+      ...prev,
+      [bookingId]: null
+    }));
 
     try {
       await checkOutBooking(bookingId);
       await fetchBookings();
+      setActionFeedbackById((prev) => ({
+        ...prev,
+        [bookingId]: { type: 'success', message: 'Checked out successfully.' }
+      }));
     } catch (err) {
-      setActionError(err.message || 'Could not check out booking');
+      setActionFeedbackById((prev) => ({
+        ...prev,
+        [bookingId]: {
+          type: 'error',
+          message: err.message || 'Could not check out booking'
+        }
+      }));
     } finally {
       setActionLoadingId(null);
     }
@@ -175,7 +201,6 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
       {loading && <LoadingState message="Loading bookings..." />}
       {!loading && <ErrorState message={error} />}
-      {!loading && <ErrorState message={actionError} />}
 
       {!loading && !error && filteredBookings.length === 0 && (
         <EmptyState message="No bookings found." />
@@ -238,6 +263,19 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
                         </button>
                       )}
                     </div>
+
+                    {actionFeedbackById[booking._id] && (
+                      <p
+                        className={
+                          actionFeedbackById[booking._id].type === 'error'
+                            ? 'form-feedback form-feedback-error'
+                            : 'form-feedback form-feedback-success'
+                        }
+                        style={{ marginTop: '8px' }}
+                      >
+                        {actionFeedbackById[booking._id].message}
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}
