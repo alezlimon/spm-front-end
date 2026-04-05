@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import GuestsPage from './components/GuestsPage';
 import RoomsPage from './components/RoomsPage';
 import BookingsPage from './components/BookingsPage';
+import BillingPage from './components/BillingPage';
 import AuthPage from './components/AuthPage';
 import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
@@ -39,6 +40,7 @@ function AppLayout() {
           <Route path="overview" element={<PropertyOverviewPage />} />
           <Route path="rooms" element={<RoomsPage />} />
           <Route path="bookings" element={<BookingsPage />} />
+          <Route path="billing" element={<BillingPage />} />
           <Route path="guests" element={<GuestsPage />} />
         </Route>
       </Routes>

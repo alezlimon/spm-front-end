@@ -121,6 +121,9 @@ export default function PropertyLayout() {
             <NavLink to={`/properties/${propertyId}/rooms`} style={getTabStyle}>
               Rooms
             </NavLink>
+            <NavLink to={`/properties/${propertyId}/billing`} style={getTabStyle}>
+              Billing
+            </NavLink>
             <NavLink to={`/properties/${propertyId}/guests`} style={getTabStyle}>
               Guests
             </NavLink>

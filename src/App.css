@@ -965,6 +965,228 @@ a {
   color: #e0bb76;
 }
 
+.billing-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.billing-kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.billing-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 252, 248, 0.03);
+}
+
+.billing-table-wrap {
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 252, 248, 0.03);
+  overflow: auto;
+}
+
+.billing-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 920px;
+}
+
+.billing-table th,
+.billing-table td {
+  text-align: left;
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(255, 248, 240, 0.07);
+  color: #d9cec3;
+  font-size: 0.84rem;
+}
+
+.billing-table th {
+  color: #a89d92;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.billing-table-subtext {
+  margin-top: 3px;
+  color: #8f867d;
+  font-size: 0.73rem;
+}
+
+.billing-modal {
+  width: min(760px, 100%);
+}
+
+.billing-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.billing-form-grid input,
+.billing-form-grid select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(255, 248, 240, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 252, 248, 0.04);
+  color: #f7f2eb;
+  font-size: 0.86rem;
+}
+
+.billing-form-grid .form-feedback {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.billing-detail-wrap {
+  display: grid;
+  gap: 12px;
+}
+
+.billing-detail-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.billing-detail-top strong {
+  color: #f7f2eb;
+  font-size: 1rem;
+}
+
+.billing-detail-top p {
+  margin: 5px 0 0;
+  color: #a89d92;
+  font-size: 0.86rem;
+}
+
+.billing-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.billing-detail-grid div {
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: rgba(255, 252, 248, 0.03);
+}
+
+.billing-detail-grid span {
+  color: #a89d92;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.billing-detail-grid strong {
+  color: #f7f2eb;
+  font-size: 0.9rem;
+}
+
+.billing-payment-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 248, 240, 0.08);
+  padding-top: 10px;
+}
+
+.billing-payment-form h5,
+.billing-payments-list h5 {
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a89d92;
+}
+
+.billing-form-grid-payments {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.billing-payments-list {
+  border-top: 1px solid rgba(255, 248, 240, 0.08);
+  padding-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.billing-payments-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.billing-payments-list li {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: #d2c7bc;
+}
+
+.invoice-status-draft {
+  background-color: rgba(160, 167, 177, 0.14);
+  border-color: rgba(160, 167, 177, 0.24);
+  color: #c8ced6;
+}
+
+.invoice-status-issued {
+  background-color: rgba(112, 184, 228, 0.12);
+  border-color: rgba(112, 184, 228, 0.25);
+  color: #a4d2ef;
+}
+
+.invoice-status-partially_paid {
+  background-color: rgba(212, 168, 93, 0.12);
+  border-color: rgba(212, 168, 93, 0.24);
+  color: #e0bb76;
+}
+
+.invoice-status-paid {
+  background-color: rgba(116, 198, 157, 0.12);
+  border-color: rgba(116, 198, 157, 0.24);
+  color: #8ad4ab;
+}
+
+.invoice-status-overdue {
+  background-color: rgba(227, 109, 97, 0.14);
+  border-color: rgba(227, 109, 97, 0.28);
+  color: #f0aaa1;
+}
+
+.invoice-status-void,
+.invoice-status-unknown {
+  background-color: rgba(160, 167, 177, 0.14);
+  border-color: rgba(160, 167, 177, 0.24);
+  color: #c8ced6;
+}
+
 /* AUTH / SPLASH */
 .auth-page {
   min-height: 100vh;
@@ -2371,6 +2593,15 @@ a {
     padding: 30px 32px 46px;
   }
 
+  .billing-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .billing-controls {
+    grid-template-columns: 1fr 320px;
+    align-items: center;
+  }
+
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2439,6 +2670,10 @@ a {
   .rooms-controls {
     grid-template-columns: 1fr 300px;
     align-items: center;
+  }
+
+  .billing-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .rooms-kpi-strip {
