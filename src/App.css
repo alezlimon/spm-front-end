@@ -1711,6 +1711,34 @@ a {
   font-size: 0.68rem;
 }
 
+.bookings-pagination {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bookings-pagination p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #c8beb4;
+}
+
+.bookings-pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bookings-pagination-actions .secondary-button {
+  min-width: 92px;
+  font-size: 0.78rem;
+  padding: 8px 12px;
+}
+
 .room-bookings-actions .room-bookings-action-btn {
   padding: 8px 12px;
   min-width: 88px;

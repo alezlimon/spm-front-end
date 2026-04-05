@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { checkInBooking, checkOutBooking, listBookings } from '../api/bookingsApi';
+import { checkInBooking, checkOutBooking, listBookings, listBookingsPage } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
-import { listRooms } from '../api/roomsApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState';
 import { formatDisplayDate, toInputDate } from '../utils/date';
@@ -15,12 +14,17 @@ const getEntityId = (value) => {
 };
 
 const normalizeStatus = (status) => (status || '').toLowerCase();
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function BookingsTable({ refreshKey, onViewBooking }) {
   const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => toInputDate(new Date()));
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isServerPaginated, setIsServerPaginated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [actionLoadingById, setActionLoadingById] = useState({});
@@ -81,28 +85,49 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
     setError('');
 
     try {
-      const [roomsData, bookingsData] = await Promise.all([
-        propertyId ? listPropertyRooms(propertyId) : listRooms(),
-        listBookings()
-      ]);
+      if (propertyId) {
+        const [roomsData, bookingsData] = await Promise.all([
+          listPropertyRooms(propertyId),
+          listBookings()
+        ]);
 
-      const roomIds = new Set((roomsData || []).map((room) => room._id));
-      const scopedBookings = (bookingsData || []).filter((booking) => {
-        const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
-        return bookingRoomId ? roomIds.has(bookingRoomId) : false;
-      });
+        const roomIds = new Set((roomsData || []).map((room) => room._id));
+        const scopedBookings = (bookingsData || []).filter((booking) => {
+          const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
+          return bookingRoomId ? roomIds.has(bookingRoomId) : false;
+        });
 
-      setBookings(scopedBookings);
+        setBookings(scopedBookings);
+        setIsServerPaginated(false);
+        setTotalItems(scopedBookings.length);
+        setTotalPages(Math.max(1, Math.ceil(scopedBookings.length / DEFAULT_PAGE_SIZE)));
+      } else {
+        const bookingsPage = await listBookingsPage({
+          status: statusFilter,
+          date: selectedDate,
+          page: currentPage,
+          limit: DEFAULT_PAGE_SIZE
+        });
+
+        setBookings(bookingsPage.items || []);
+        setIsServerPaginated(Boolean(bookingsPage.isServerPaginated));
+        setTotalItems(bookingsPage.total || 0);
+        setTotalPages(Math.max(1, bookingsPage.totalPages || 1));
+      }
     } catch (err) {
       setError(err.message || 'Error fetching bookings');
     } finally {
       setLoading(false);
     }
-  }, [propertyId]);
+  }, [currentPage, propertyId, selectedDate, statusFilter]);
 
   useEffect(() => {
     fetchBookings();
   }, [fetchBookings, refreshKey]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [propertyId, selectedDate, statusFilter]);
 
   useEffect(() => {
     return () => {
@@ -209,6 +234,22 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
     return normalizeStatus(booking.status) === statusFilter;
   });
 
+  const usesClientPagination = propertyId || !isServerPaginated;
+  const effectiveTotalPages = usesClientPagination
+    ? Math.max(1, Math.ceil(filteredBookings.length / DEFAULT_PAGE_SIZE))
+    : Math.max(1, totalPages);
+  const startIndex = (currentPage - 1) * DEFAULT_PAGE_SIZE;
+  const paginatedBookings = usesClientPagination
+    ? filteredBookings.slice(startIndex, startIndex + DEFAULT_PAGE_SIZE)
+    : filteredBookings;
+  const totalItemsLabel = usesClientPagination ? filteredBookings.length : totalItems;
+
+  useEffect(() => {
+    if (currentPage > effectiveTotalPages) {
+      setCurrentPage(effectiveTotalPages);
+    }
+  }, [currentPage, effectiveTotalPages]);
+
   return (
     <div className="bookings-table-wrapper">
       <div className="bookings-table-header">
@@ -261,11 +302,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       {loading && <LoadingState message="Loading bookings..." />}
       {!loading && <ErrorState message={error} />}
 
-      {!loading && !error && filteredBookings.length === 0 && (
+      {!loading && !error && paginatedBookings.length === 0 && (
         <EmptyState message="No bookings found." />
       )}
 
-      {!loading && !error && filteredBookings.length > 0 && (
+      {!loading && !error && paginatedBookings.length > 0 && (
         <>
           {recentActionErrors.length > 0 && (
             <div className="ops-errors-card" role="status" aria-live="polite">
@@ -306,7 +347,7 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
               </thead>
 
               <tbody>
-                {filteredBookings.map((booking) => {
+                {paginatedBookings.map((booking) => {
                   const bookingReference = booking._id.slice(-6).toUpperCase();
 
                   return (
@@ -369,6 +410,32 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
                 })}
               </tbody>
             </table>
+          </div>
+
+          <div className="bookings-pagination" aria-label="Bookings pagination">
+            <p>
+              Page {currentPage} of {effectiveTotalPages} - {totalItemsLabel} result{totalItemsLabel === 1 ? '' : 's'}
+            </p>
+
+            <div className="bookings-pagination-actions">
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              >
+                Previous
+              </button>
+
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={currentPage >= effectiveTotalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(effectiveTotalPages, prev + 1))}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </>
       )}

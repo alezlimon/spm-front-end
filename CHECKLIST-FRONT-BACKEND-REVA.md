@@ -87,7 +87,8 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 
 - [x] Sync diario corto FE-BE para bloqueantes.
 - [x] Backend compartio DoD de errores para endpoints prioritarios (2026-04-05).
-- [ ] Revalidar en staging y remover fallback de traduccion FE (objetivo: 2026-04-12).
+- [ ] Revalidar en staging para eliminar fallback de traduccion FE definitivamente (objetivo: 2026-04-12).
+- [x] Fallback de traduccion FE desactivado por defecto y solo habilitable por flag temporal.
 
 ## 9) Frontend ya entregado
 
@@ -102,11 +103,12 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Feedback por fila con auto-limpieza en operaciones de bookings table y room history.
 - [x] Estados de carga por fila para evitar bloqueos globales en acciones operativas.
 - [x] Flujo de booking detail con acciones operativas unificadas y mensajes consistentes.
+- [x] Tabla de bookings preparada para filtros/paginacion server-side con fallback cliente.
 
 ## 10) Siguiente bloque FE (sin bloqueo)
 
 - [x] Robustecer feedback en quick actions (success/error por fila en tabla).
 - [x] Homogeneizar estilos de botones operativos en bookings y room history.
 - [ ] Remover fallback de traduccion FE tras validacion de staging (2026-04-12).
-- [ ] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
+- [x] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
 - [ ] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).
