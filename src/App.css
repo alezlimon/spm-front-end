@@ -47,6 +47,34 @@ a {
   color: #a89d92;
 }
 
+.rooms-view-toggle {
+  margin-top: 14px;
+  display: inline-flex;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 248, 240, 0.1);
+  background: rgba(255, 252, 248, 0.03);
+}
+
+.rooms-view-toggle button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #b8aca0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rooms-view-toggle button.active {
+  border-color: rgba(212, 168, 93, 0.35);
+  background: rgba(212, 168, 93, 0.16);
+  color: #f0d4a0;
+}
+
 .assistant {
   margin-bottom: 18px;
   padding: 18px 20px;
@@ -785,6 +813,156 @@ a {
 .rooms-filter-pill-out-of-service.active strong {
   background: rgba(160, 167, 177, 0.3);
   color: #eef2f7;
+}
+
+.rooms-timeline-wrap {
+  border: 1px solid rgba(255, 248, 240, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 252, 248, 0.03);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
+  overflow: auto;
+}
+
+.rooms-timeline-header,
+.rooms-timeline-row {
+  min-width: 1040px;
+  display: grid;
+  grid-template-columns: 170px minmax(760px, 1fr);
+}
+
+.rooms-timeline-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(14, 13, 12, 0.92);
+  border-bottom: 1px solid rgba(255, 248, 240, 0.08);
+}
+
+.rooms-timeline-header-room {
+  padding: 12px 14px;
+  border-right: 1px solid rgba(255, 248, 240, 0.08);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a89d92;
+  font-weight: 600;
+}
+
+.rooms-timeline-header-days {
+  display: grid;
+  grid-template-columns: repeat(var(--timeline-days), minmax(76px, 1fr));
+}
+
+.rooms-timeline-day-cell {
+  padding: 12px 8px;
+  text-align: center;
+  border-right: 1px solid rgba(255, 248, 240, 0.06);
+  font-size: 0.72rem;
+  color: #bcb0a4;
+  font-weight: 600;
+}
+
+.rooms-timeline-row {
+  border-bottom: 1px solid rgba(255, 248, 240, 0.06);
+}
+
+.rooms-timeline-row:last-child {
+  border-bottom: none;
+}
+
+.rooms-timeline-room-cell {
+  padding: 12px 14px;
+  border-right: 1px solid rgba(255, 248, 240, 0.08);
+  display: grid;
+  gap: 2px;
+}
+
+.rooms-timeline-room-cell strong {
+  color: #f7f2eb;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.rooms-timeline-room-cell span {
+  color: #aa9f94;
+  font-size: 0.8rem;
+}
+
+.rooms-timeline-room-cell small {
+  color: #d4a85d;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.rooms-timeline-track {
+  position: relative;
+  min-height: 64px;
+  padding: 10px 8px;
+  display: grid;
+  align-items: center;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent calc((100% / var(--timeline-days)) - 1px),
+    rgba(255, 248, 240, 0.06) calc((100% / var(--timeline-days)) - 1px),
+    rgba(255, 248, 240, 0.06) calc(100% / var(--timeline-days))
+  );
+}
+
+.rooms-timeline-empty {
+  color: #7f766f;
+  font-size: 0.75rem;
+  padding-left: 8px;
+}
+
+.timeline-booking-chip {
+  position: absolute;
+  left: calc((var(--segment-start) / var(--timeline-days)) * 100% + 8px);
+  width: calc((var(--segment-span) / var(--timeline-days)) * 100% - 12px);
+  max-width: calc((var(--segment-span) / var(--timeline-days)) * 100% - 12px);
+  min-width: 36px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 7px 8px;
+  text-align: left;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.timeline-booking-confirmed {
+  background: rgba(112, 184, 228, 0.15);
+  border-color: rgba(112, 184, 228, 0.3);
+  color: #a4d2ef;
+}
+
+.timeline-booking-checked-in {
+  background: rgba(116, 198, 157, 0.15);
+  border-color: rgba(116, 198, 157, 0.3);
+  color: #9bddbc;
+}
+
+.timeline-booking-checked-out {
+  background: rgba(160, 167, 177, 0.2);
+  border-color: rgba(160, 167, 177, 0.33);
+  color: #c8ced6;
+}
+
+.timeline-booking-cancelled {
+  background: rgba(227, 109, 97, 0.15);
+  border-color: rgba(227, 109, 97, 0.34);
+  color: #f0aaa1;
+}
+
+.timeline-booking-default {
+  background: rgba(212, 168, 93, 0.16);
+  border-color: rgba(212, 168, 93, 0.34);
+  color: #e0bb76;
 }
 
 /* AUTH / SPLASH */

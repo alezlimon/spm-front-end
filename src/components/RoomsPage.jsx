@@ -3,14 +3,18 @@ import { useParams } from 'react-router-dom';
 import { listAllBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms, updateRoom } from '../api/roomsApi';
+import BookingDetailPage from './BookingDetailPage';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
 import RoomCard from './RoomCard';
+import RoomsTimelineView from './RoomsTimelineView';
 import '../App.css';
 
 export default function RoomsPage() {
   const { propertyId } = useParams();
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [viewMode, setViewMode] = useState('timeline');
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -151,6 +155,22 @@ export default function RoomsPage() {
       <header className="header">
         <h1>Rooms</h1>
         <p>Run front desk operations fast: know what is ready, blocked, occupied, or out of service.</p>
+        <div className="rooms-view-toggle" role="tablist" aria-label="Rooms view mode">
+          <button
+            type="button"
+            className={viewMode === 'timeline' ? 'active' : ''}
+            onClick={() => setViewMode('timeline')}
+          >
+            Timeline
+          </button>
+          <button
+            type="button"
+            className={viewMode === 'cards' ? 'active' : ''}
+            onClick={() => setViewMode('cards')}
+          >
+            Cards
+          </button>
+        </div>
       </header>
 
       <div className="rooms-layout">
@@ -222,7 +242,7 @@ export default function RoomsPage() {
             <EmptyState message="No rooms match the current filters." />
           )}
 
-          {!loading && !error && filteredRooms.length > 0 && (
+          {!loading && !error && filteredRooms.length > 0 && viewMode === 'cards' && (
             <div className="rooms-grid">
               {sortedRooms.map((room) => (
                 <RoomCard
@@ -234,8 +254,26 @@ export default function RoomsPage() {
               ))}
             </div>
           )}
+
+          {!loading && !error && filteredRooms.length > 0 && viewMode === 'timeline' && (
+            <RoomsTimelineView
+              rooms={sortedRooms}
+              bookings={bookings}
+              onViewBooking={(booking) => setSelectedBookingId(booking._id)}
+            />
+          )}
         </section>
       </div>
+
+      {selectedBookingId && (
+        <BookingDetailPage
+          bookingId={selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
+          onUpdated={() => {
+            setSelectedBookingId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
