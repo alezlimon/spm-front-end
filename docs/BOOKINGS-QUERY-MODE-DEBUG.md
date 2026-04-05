@@ -2,7 +2,7 @@
 
 Date: 2026-04-05
 
-Purpose: speed up FE-BE verification of bookings list filters while backend finalizes the canonical query contract.
+Purpose: speed up FE-BE verification of bookings list filters with confirmed staging contract.
 
 ## Active frontend switch
 
@@ -12,8 +12,12 @@ Frontend uses environment variable:
 
 Current defaults:
 
-- `.env.example`: `compat`
+- `.env.example`: `range`
 - Runtime fallback if invalid/missing: `compat`
+
+Current confirmed staging mode:
+
+- `MODE: range`
 
 ## What frontend sends
 
@@ -82,10 +86,21 @@ Also supported: `bookings` as items key and `meta` as pagination key.
 
 ## FE-BE quick validation steps
 
-1. Backend confirms canonical query mode (`date` or `range`).
-2. Frontend sets `VITE_BOOKINGS_QUERY_MODE` to that mode in target environment.
-3. Verify Bookings table in dev/staging:
+1. Set `VITE_BOOKINGS_QUERY_MODE=range` in target env.
+2. Open Bookings table in dev/staging and verify filters:
 - status filter works
 - date filter works
 - pagination stays consistent
-4. Verify no mixed contract regressions in Rooms and Guests pages (they consume all bookings through paginated-safe helper).
+3. Verify no mixed contract regressions in Rooms and Guests pages (they consume all bookings through paginated-safe helper).
+
+## 60-second staging validation
+
+1. Open Bookings page and set:
+- Status: `Confirmed`
+- Date: any known busy date
+- Page: move to page 2
+2. In dev diagnostics hint, check:
+- Query mode shows `range`
+- Preview path includes `from=...&to=...`
+3. Trigger one filter change and confirm table refreshes without stale flash.
+4. Confirm backend logs show `from/to` params for the request.

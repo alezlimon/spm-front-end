@@ -313,9 +313,24 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       page: currentPage,
       limit: DEFAULT_PAGE_SIZE
     });
+  const isQueryCopyDisabled = Boolean(propertyId);
 
   const handleCopyQueryPreview = async () => {
     if (!import.meta.env.DEV) {
+      return;
+    }
+
+    if (isQueryCopyDisabled) {
+      setCopiedQueryState('Not available in property scope');
+
+      if (queryCopyTimeoutRef.current) {
+        clearTimeout(queryCopyTimeoutRef.current);
+      }
+
+      queryCopyTimeoutRef.current = setTimeout(() => {
+        setCopiedQueryState('');
+      }, 1600);
+
       return;
     }
 
@@ -399,10 +414,17 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
                 type="button"
                 className="secondary-button bookings-dev-copy-btn"
                 onClick={handleCopyQueryPreview}
+                disabled={isQueryCopyDisabled}
               >
                 {copiedQueryState === 'Copied' ? 'Copied' : 'Copy'}
               </button>
             </div>
+
+            {isQueryCopyDisabled && (
+              <span className="bookings-dev-copy-note">
+                Copy is disabled because this view applies local property scoping after fetch.
+              </span>
+            )}
 
             {copiedQueryState && copiedQueryState !== 'Copied' && (
               <span className="bookings-dev-copy-status">{copiedQueryState}</span>

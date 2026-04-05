@@ -1612,6 +1612,14 @@ a {
   color: #e8b9b2;
 }
 
+.bookings-dev-copy-note {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #bfb5ab;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .ops-errors-card {
   margin-bottom: 12px;
   background: rgba(227, 109, 97, 0.1);
