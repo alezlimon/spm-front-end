@@ -12,6 +12,7 @@ import { listPropertyRooms } from '../api/propertiesApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState';
 import { formatDisplayDate, toInputDate } from '../utils/date';
+import PaymentStatusBadge from './PaymentStatusBadge';
 import '../App.css';
 
 const getEntityId = (value) => {
@@ -492,9 +493,15 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
                       <td>{formatDisplayDate(booking.checkIn || booking.checkInDate)}</td>
                       <td>{formatDisplayDate(booking.checkOut || booking.checkOutDate)}</td>
                       <td>
-                        <span className={`status-badge ${getStatusClass(booking.status)}`}>
-                          {booking.status || 'Unknown'}
-                        </span>
+                        <div className="booking-status-stack">
+                          <span className={`status-badge ${getStatusClass(booking.status)}`}>
+                            {booking.status || 'Unknown'}
+                          </span>
+
+                          {booking.paymentStatus && (
+                            <PaymentStatusBadge status={booking.paymentStatus} />
+                          )}
+                        </div>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>

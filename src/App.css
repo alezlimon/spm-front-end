@@ -342,6 +342,42 @@ a {
   color: #e0bb76;
 }
 
+.payment-status-paid {
+  background-color: rgba(116, 198, 157, 0.12);
+  border-color: rgba(116, 198, 157, 0.24);
+  color: #8ad4ab;
+}
+
+.payment-status-pending {
+  background-color: rgba(212, 168, 93, 0.12);
+  border-color: rgba(212, 168, 93, 0.24);
+  color: #e0bb76;
+}
+
+.payment-status-failed {
+  background-color: rgba(227, 109, 97, 0.14);
+  border-color: rgba(227, 109, 97, 0.28);
+  color: #f0aaa1;
+}
+
+.payment-status-refunded {
+  background-color: rgba(112, 184, 228, 0.12);
+  border-color: rgba(112, 184, 228, 0.25);
+  color: #a4d2ef;
+}
+
+.payment-status-unpaid,
+.payment-status-unknown {
+  background-color: rgba(160, 167, 177, 0.14);
+  border-color: rgba(160, 167, 177, 0.24);
+  color: #c8ced6;
+}
+
+.booking-status-stack {
+  display: grid;
+  gap: 6px;
+}
+
 .room-actions {
   display: flex;
   flex-wrap: wrap;

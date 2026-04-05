@@ -5,6 +5,7 @@ import { formatDisplayDate } from '../utils/date';
 import { resolveBookingPricing } from '../utils/bookingPricing';
 import { formatCurrency } from '../utils/money';
 import AssignGuestToBooking from './AssignGuestToBooking';
+import PaymentStatusBadge from './PaymentStatusBadge';
 import { ErrorState, LoadingState } from './PageState';
 
 const getGuestLabel = (booking) => {
@@ -155,6 +156,12 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
               <span>Status</span>
               <strong>{booking.status || 'Unknown'}</strong>
             </div>
+            {booking.paymentStatus && (
+              <div className="modal-pricing-row">
+                <span>Payment</span>
+                <PaymentStatusBadge status={booking.paymentStatus} />
+              </div>
+            )}
             {pricing.hasSnapshot && typeof pricing.base === 'number' && (
               <div className="modal-pricing-row">
                 <span>Base</span>
