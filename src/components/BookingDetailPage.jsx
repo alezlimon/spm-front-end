@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking, getBookingById } from '../api/bookingsApi';
+import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { formatDisplayDate } from '../utils/date';
 import AssignGuestToBooking from './AssignGuestToBooking';
 import { ErrorState, LoadingState } from './PageState';
@@ -160,7 +161,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
             <button
               type="button"
               className="primary-button"
-              disabled={actionLoading || booking.status === 'Checked-in'}
+              disabled={actionLoading || !canCheckIn(booking.status)}
               onClick={handleCheckIn}
             >
               {actionLoading ? 'Processing...' : 'Check in'}
@@ -168,7 +169,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
             <button
               type="button"
               className="secondary-button"
-              disabled={actionLoading || booking.status !== 'Checked-in'}
+              disabled={actionLoading || !canCheckOut(booking.status)}
               onClick={handleCheckOut}
             >
               Check out

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
+import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { listRoomBookings } from '../api/roomsApi';
 import { formatDisplayDate } from '../utils/date';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
@@ -51,7 +52,7 @@ export default function RoomBookings({ roomId }) {
             <br/>
             <span style={{color:'#6b7280'}}>Status: {b.status}</span>
             <div style={{marginTop:6,display:'flex',gap:8}}>
-              {b.status !== 'Checked-in' && (
+              {canCheckIn(b.status) && (
                 <button
                   style={{background:'#059669',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
                   onClick={async () => {
@@ -60,7 +61,7 @@ export default function RoomBookings({ roomId }) {
                   }}
                 >Check-in</button>
               )}
-              {b.status === 'Checked-in' && (
+              {canCheckOut(b.status) && (
                 <button
                   style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
                   onClick={async () => {
