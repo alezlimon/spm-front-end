@@ -94,6 +94,14 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
   const canProceedStep1 = checkIn && checkOut && nights > 0 && selectedRoom !== null;
 
+  const step1ValidationMessage = (() => {
+    if (!checkIn) return 'Select a check-in date.';
+    if (!checkOut) return 'Select a check-out date.';
+    if (nights <= 0) return 'Check-out must be after check-in.';
+    if (!selectedRoom) return 'Select an available room to continue.';
+    return '';
+  })();
+
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validatePrimaryGuest = () => {
@@ -505,6 +513,12 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
         {/* Footer */}
         <div className="modal-footer">
+          {step === 1 && !canProceedStep1 && (
+            <p className="page-feedback page-feedback-error" style={{ marginRight: '12px' }}>
+              {step1ValidationMessage}
+            </p>
+          )}
+
           {step > 1 ? (
             <button type="button" className="secondary-button" onClick={() => setStep(step - 1)}>
               Back

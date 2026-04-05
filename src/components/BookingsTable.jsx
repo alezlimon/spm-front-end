@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { listBookings } from '../api/bookingsApi';
+import { checkInBooking, checkOutBooking, listBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms } from '../api/roomsApi';
+import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState';
 import { formatDisplayDate, toInputDate } from '../utils/date';
 import '../App.css';
@@ -22,34 +23,64 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [actionError, setActionError] = useState('');
+
+  const fetchBookings = useCallback(async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const [roomsData, bookingsData] = await Promise.all([
+        propertyId ? listPropertyRooms(propertyId) : listRooms(),
+        listBookings()
+      ]);
+
+      const roomIds = new Set((roomsData || []).map((room) => room._id));
+      const scopedBookings = (bookingsData || []).filter((booking) => {
+        const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
+        return bookingRoomId ? roomIds.has(bookingRoomId) : false;
+      });
+
+      setBookings(scopedBookings);
+    } catch (err) {
+      setError(err.message || 'Error fetching bookings');
+    } finally {
+      setLoading(false);
+    }
+  }, [propertyId]);
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      setLoading(true);
-      setError('');
-
-      try {
-        const [roomsData, bookingsData] = await Promise.all([
-          propertyId ? listPropertyRooms(propertyId) : listRooms(),
-          listBookings()
-        ]);
-
-        const roomIds = new Set((roomsData || []).map((room) => room._id));
-        const scopedBookings = (bookingsData || []).filter((booking) => {
-          const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
-          return bookingRoomId ? roomIds.has(bookingRoomId) : false;
-        });
-
-        setBookings(scopedBookings);
-      } catch (err) {
-        setError(err.message || 'Error fetching bookings');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBookings();
-  }, [propertyId, refreshKey]);
+  }, [fetchBookings, refreshKey]);
+
+  const handleQuickCheckIn = async (bookingId) => {
+    setActionLoadingId(bookingId);
+    setActionError('');
+
+    try {
+      await checkInBooking(bookingId);
+      await fetchBookings();
+    } catch (err) {
+      setActionError(err.message || 'Could not check in booking');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleQuickCheckOut = async (bookingId) => {
+    setActionLoadingId(bookingId);
+    setActionError('');
+
+    try {
+      await checkOutBooking(bookingId);
+      await fetchBookings();
+    } catch (err) {
+      setActionError(err.message || 'Could not check out booking');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   const getGuestName = (booking) => {
     if (!booking.guest) return 'Unassigned';
@@ -144,6 +175,7 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
       {loading && <LoadingState message="Loading bookings..." />}
       {!loading && <ErrorState message={error} />}
+      {!loading && <ErrorState message={actionError} />}
 
       {!loading && !error && filteredBookings.length === 0 && (
         <EmptyState message="No bookings found." />
@@ -178,12 +210,34 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
                     </span>
                   </td>
                   <td>
-                    <button
-                      className="secondary-button"
-                      onClick={() => onViewBooking?.(booking)}
-                    >
-                      View
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="secondary-button"
+                        onClick={() => onViewBooking?.(booking)}
+                      >
+                        View
+                      </button>
+
+                      {canCheckIn(booking.status) && (
+                        <button
+                          className="primary-button"
+                          disabled={actionLoadingId === booking._id}
+                          onClick={() => handleQuickCheckIn(booking._id)}
+                        >
+                          {actionLoadingId === booking._id ? '...' : 'Check in'}
+                        </button>
+                      )}
+
+                      {canCheckOut(booking.status) && (
+                        <button
+                          className="primary-button"
+                          disabled={actionLoadingId === booking._id}
+                          onClick={() => handleQuickCheckOut(booking._id)}
+                        >
+                          {actionLoadingId === booking._id ? '...' : 'Check out'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
