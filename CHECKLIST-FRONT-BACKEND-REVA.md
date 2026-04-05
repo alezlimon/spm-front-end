@@ -121,3 +121,9 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12) usando `docs/STAGING-VALIDATION-RUNBOOK.md`.
 - [x] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
 - [ ] Ejecutar validacion conjunta en staging y marcar cada checkpoint como `Pass`, `Pending contract` o `Blocked by missing endpoint` en `docs/STAGING-VALIDATION-RUNBOOK.md`.
+
+## 11) Billing readiness (futuro)
+
+- [x] Documento de preparacion creado: `docs/BILLING-READINESS-NOTE.md`.
+- [ ] Congelar contrato backend de currency/rounding y snapshot de pricing.
+- [ ] Definir enum y transiciones de estado de pago.
