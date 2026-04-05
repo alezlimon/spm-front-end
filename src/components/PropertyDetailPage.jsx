@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getProperty, listProperties, listPropertyRooms } from '../api/propertiesApi';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 import '../App.css';
 
 import alpineHouseImage from '../assets/properties/Property Images/Alpine House.png';
@@ -109,7 +110,7 @@ export default function PropertyDetailPage() {
   if (loading) {
     return (
       <div className="app">
-        <p className="page-feedback">Loading property...</p>
+        <LoadingState message="Loading property..." />
       </div>
     );
   }
@@ -117,9 +118,7 @@ export default function PropertyDetailPage() {
   if (error || !property) {
     return (
       <div className="app">
-        <p className="page-feedback page-feedback-error">
-          {error || 'Property not found'}
-        </p>
+        <ErrorState message={error || 'Property not found'} />
         <Link to="/properties" className="secondary-button">
           Back to Properties
         </Link>
@@ -257,7 +256,7 @@ export default function PropertyDetailPage() {
 
             <div className="property-detail-rooms-grid">
               {rooms.length === 0 ? (
-                <p className="page-feedback">No rooms found for this property.</p>
+                <EmptyState message="No rooms found for this property." />
               ) : (
                 rooms.map((room) => (
                   <article key={room._id} className="property-detail-room-card">

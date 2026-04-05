@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { listGuests } from '../api/guestsApi';
+import { ErrorState, LoadingState } from './PageState';
 
 export default function GuestSelector({ value, onChange }) {
   const [guests, setGuests] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     const fetchGuests = async () => {
       setLoading(true);
+      setError('');
 
       try {
         const data = await listGuests(search);
         setGuests(data || []);
+      } catch (err) {
+        setError(err.message || 'Could not load guests');
+        setGuests([]);
       } finally {
         setLoading(false);
       }
@@ -43,7 +49,8 @@ export default function GuestSelector({ value, onChange }) {
           </option>
         ))}
       </select>
-      {loading && <p style={{color:'#6b7280'}}>Loading guests...</p>}
+      {loading && <LoadingState message="Loading guests..." />}
+      {!loading && <ErrorState message={error} />}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { listBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms } from '../api/roomsApi';
+import { EmptyState, ErrorState, LoadingState } from '../components/PageState';
 import { formatDisplayDate, toInputDate } from '../utils/date';
 import '../App.css';
 
@@ -141,11 +142,11 @@ export default function BookingsTable({ refreshKey }) {
         <p>Track reservations for the selected day and filter by status.</p>
       </div>
 
-      {loading && <p className="page-feedback">Loading bookings...</p>}
-      {error && <p className="page-feedback page-feedback-error">{error}</p>}
+      {loading && <LoadingState message="Loading bookings..." />}
+      {!loading && <ErrorState message={error} />}
 
       {!loading && !error && filteredBookings.length === 0 && (
-        <p className="page-feedback">No bookings found.</p>
+        <EmptyState message="No bookings found." />
       )}
 
       {!loading && !error && filteredBookings.length > 0 && (

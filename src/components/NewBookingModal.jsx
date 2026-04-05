@@ -3,6 +3,7 @@ import { getErrorMessage } from '../api/client';
 import { createBooking } from '../api/bookingsApi';
 import { createGuest, listGuests } from '../api/guestsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 import { toInputDate } from '../utils/date';
 const BREAKFAST_PRICE = 15;
 
@@ -245,10 +246,10 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
             {nights > 0 && (
               <div className="modal-rooms-section">
                 <p className="modal-section-label">Select a room</p>
-                {roomsLoading && <p className="page-feedback">Loading rooms...</p>}
-                {roomsError && <p className="page-feedback page-feedback-error">{roomsError}</p>}
+                {roomsLoading && <LoadingState message="Loading rooms..." />}
+                {!roomsLoading && <ErrorState message={roomsError} />}
                 {!roomsLoading && !roomsError && rooms.length === 0 && (
-                  <p className="page-feedback">No available rooms for these dates.</p>
+                  <EmptyState message="No available rooms for these dates." />
                 )}
                 <div className="modal-rooms-grid">
                   {rooms.map((room) => (

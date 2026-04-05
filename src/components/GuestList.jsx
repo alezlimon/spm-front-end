@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { updateGuest } from '../api/guestsApi';
+import { EmptyState } from './PageState';
 import EditGuestForm from './EditGuestForm';
 import '../App.css';
 
@@ -7,7 +8,7 @@ export default function GuestList({ guests, onGuestUpdated }) {
   const [editingId, setEditingId] = useState(null);
 
   if (!guests.length) {
-    return <p className="page-feedback">No guests found.</p>;
+    return <EmptyState message="No guests found." />;
   }
 
   const handleEdit = (id) => setEditingId(id);

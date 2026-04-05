@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
 import { listRoomBookings } from '../api/roomsApi';
+import { formatDisplayDate } from '../utils/date';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 
 export default function RoomBookings({ roomId }) {
   const [bookings, setBookings] = useState([]);
@@ -36,13 +38,16 @@ export default function RoomBookings({ roomId }) {
   return (
     <div style={{marginTop:12}}>
       <strong>Booking history:</strong>
-      {loading && <p style={{color:'#6b7280'}}>Loading bookings...</p>}
-      {error && <p style={{color:'#b91c1c'}}>{error}</p>}
+      {loading && <LoadingState message="Loading bookings..." />}
+      {!loading && <ErrorState message={error} />}
+      {!loading && !error && bookings.length === 0 && (
+        <EmptyState message="No bookings found for this room." />
+      )}
       <ul style={{listStyle:'none',padding:0}}>
         {bookings.map(b => (
           <li key={b._id} style={{background:'#f3f4f6',borderRadius:6,padding:10,marginBottom:8}}>
             <span style={{fontWeight:600}}>{b.guest?.firstName} {b.guest?.lastName}</span> —
-            <span style={{color:'#6b7280'}}> {new Date(b.checkIn).toLocaleDateString()} to {new Date(b.checkOut).toLocaleDateString()}</span>
+            <span style={{color:'#6b7280'}}> {formatDisplayDate(b.checkIn)} to {formatDisplayDate(b.checkOut)}</span>
             <br/>
             <span style={{color:'#6b7280'}}>Status: {b.status}</span>
             <div style={{marginTop:6,display:'flex',gap:8}}>

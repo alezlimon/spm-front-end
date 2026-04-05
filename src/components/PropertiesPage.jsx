@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listProperties } from '../api/propertiesApi';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 import '../App.css';
 
 import alpineHouseImage from '../assets/properties/Property Images/Alpine House.png';
@@ -60,8 +61,11 @@ export default function PropertiesPage() {
         </div>
       </header>
 
-      {loading && <p className="page-feedback">Loading properties...</p>}
-      {error && <p className="page-feedback page-feedback-error">{error}</p>}
+      {loading && <LoadingState message="Loading properties..." />}
+      {!loading && <ErrorState message={error} />}
+      {!loading && !error && properties.length === 0 && (
+        <EmptyState message="No properties found." />
+      )}
 
       <div className="properties-grid properties-grid-compact">
         {!loading && !error && properties.map((property) => {

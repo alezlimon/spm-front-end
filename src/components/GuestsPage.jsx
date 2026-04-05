@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { listBookings } from '../api/bookingsApi';
 import { listGuests } from '../api/guestsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
+import { ErrorState, LoadingState } from './PageState';
 import NewGuestForm from './NewGuestForm';
 import GuestList from './GuestList';
 import '../App.css';
@@ -130,8 +131,8 @@ export default function GuestsPage() {
             />
           </div>
 
-          {loading && <p className="page-feedback">Loading guests...</p>}
-          {error && <p className="page-feedback page-feedback-error">{error}</p>}
+          {loading && <LoadingState message="Loading guests..." />}
+          {!loading && <ErrorState message={error} />}
 
           {!loading && !error && (
             <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />

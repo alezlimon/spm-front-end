@@ -17,11 +17,11 @@ Objetivo: cerrar integracion FE-BE minimizando logica en frontend y centralizand
 - [ ] Definir respuesta de error consistente en login/verify.
 
 ### Errores (critico)
-- [ ] Definir envelope unico de error para todos los modulos:
+- [x] Definir envelope unico de error para endpoints prioritarios:
   - `message` (string)
   - `errorCode` (string estable)
   - `details` (array opcional)
-- [ ] Unificar idioma de mensajes (preferible ingles tecnico + mapeo FE a textos UX).
+- [x] Unificar idioma de mensajes en endpoints prioritarios (English).
 
 ### Bookings (core negocio)
 - [ ] Implementar validacion anti-overbooking en backend.
@@ -30,7 +30,7 @@ Objetivo: cerrar integracion FE-BE minimizando logica en frontend y centralizand
 - [ ] Asegurar que `checkIn/checkOut` no permitan transiciones invalidas.
 
 ### Guests
-- [ ] Sustituir comportamiento `200 reused` por contrato determinista documentado (ideal `409` o flag estandarizado estable).
+- [x] Sustituir comportamiento `200 reused` por contrato determinista (`409 GUEST_DUPLICATE`) en endpoints prioritarios.
 - [ ] Estabilizar reglas de duplicado por email/document.
 
 ## 2) Importante Semana 2
@@ -82,3 +82,9 @@ Un modulo se considera listo para frontend si cumple todo:
 ## 7) Mensaje rapido para enviar al backend
 
 Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la mayor parte de la logica al backend. Priorizamos cerrar esta semana: (1) error envelope unico, (2) validaciones de negocio de bookings en servidor (anti-overbooking, capacidad, transiciones), (3) contrato determinista para duplicados de guest y (4) ruta canonica de auth. Con eso nosotros cerramos MVP FE sin parches fragiles. Si os parece, hacemos seguimiento diario corto de bloqueantes y congelamos contrato por sprint para evitar breaking changes de ultima hora.
+
+## 8) Cadencia FE-BE (activa)
+
+- [x] Sync diario corto FE-BE para bloqueantes.
+- [x] Backend compartio DoD de errores para endpoints prioritarios (2026-04-05).
+- [ ] Revalidar en staging y remover fallback de traduccion FE (objetivo: 2026-04-12).

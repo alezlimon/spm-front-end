@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { listBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms, updateRoom } from '../api/roomsApi';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 import RoomCard from './RoomCard';
 import '../App.css';
 
@@ -214,11 +215,11 @@ export default function RoomsPage() {
         </section>
 
         <section>
-          {loading && <p className="page-feedback">Loading rooms...</p>}
-          {error && <p className="page-feedback page-feedback-error">{error}</p>}
+          {loading && <LoadingState message="Loading rooms..." />}
+          {!loading && <ErrorState message={error} />}
 
           {!loading && !error && filteredRooms.length === 0 && (
-            <p className="page-feedback">No rooms found.</p>
+            <EmptyState message="No rooms found." />
           )}
 
           {!loading && !error && filteredRooms.length > 0 && (

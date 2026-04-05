@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProperty, getPropertyOverview } from '../api/propertiesApi';
+import { ErrorState, LoadingState } from './PageState';
 import '../App.css';
 
 export default function PropertyOverviewPage() {
@@ -52,8 +53,8 @@ export default function PropertyOverviewPage() {
         <p>Daily operational snapshot for arrivals, departures, occupancy, and room availability.</p>
       </header>
 
-      {loading && <p className="page-feedback">Loading overview...</p>}
-      {error && <p className="page-feedback page-feedback-error">{error}</p>}
+      {loading && <LoadingState message="Loading overview..." />}
+      {!loading && <ErrorState message={error} />}
 
       {!loading && !error && (
         <>

@@ -18,7 +18,7 @@ Last updated: 2026-04-05
 - [x] Normalize API base URL and auth base URL generation
 - [x] Centralize error message extraction for inconsistent backend payloads
 - [x] Refactor remaining components to use `src/api/*`
-- [ ] Add empty/loading/error states consistently across screens
+- [x] Add empty/loading/error states consistently across core screens
 - [x] Add route-level guards for auth-expired write actions
 - [x] Add one reusable date helper for API/UI formatting
 
