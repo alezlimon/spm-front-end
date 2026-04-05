@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking, getBookingById } from '../api/bookingsApi';
 import { formatDisplayDate } from '../utils/date';
 import AssignGuestToBooking from './AssignGuestToBooking';
@@ -34,31 +34,37 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
 
-  useEffect(() => {
-    const loadBooking = async () => {
-      if (!bookingId) {
-        setBooking(null);
-        setLoading(false);
-        return;
-      }
+  const loadBooking = useCallback(async ({ showLoader = false } = {}) => {
+    if (!bookingId) {
+      setBooking(null);
+      setLoading(false);
+      return null;
+    }
 
+    if (showLoader) {
       setLoading(true);
       setLoadingError('');
       setActionSuccess('');
+    }
 
-      try {
-        const bookingData = await getBookingById(bookingId);
-        setBooking(bookingData || null);
-      } catch (error) {
-        setLoadingError(error.message || 'Could not load booking details');
-        setBooking(null);
-      } finally {
+    try {
+      const bookingData = await getBookingById(bookingId);
+      setBooking(bookingData || null);
+      return bookingData || null;
+    } catch (error) {
+      setLoadingError(error.message || 'Could not load booking details');
+      setBooking(null);
+      return null;
+    } finally {
+      if (showLoader) {
         setLoading(false);
       }
-    };
-
-    loadBooking();
+    }
   }, [bookingId]);
+
+  useEffect(() => {
+    loadBooking({ showLoader: true });
+  }, [loadBooking]);
 
   const handleCheckIn = async () => {
     if (!booking?._id) {
@@ -71,8 +77,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
     try {
       await checkInBooking(booking._id);
-      const freshBooking = await getBookingById(booking._id);
-      setBooking(freshBooking || booking);
+      await loadBooking();
       onUpdated?.();
       setActionSuccess('Booking checked in successfully.');
     } catch (error) {
@@ -93,8 +98,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
     try {
       await checkOutBooking(booking._id);
-      const freshBooking = await getBookingById(booking._id);
-      setBooking(freshBooking || booking);
+      await loadBooking();
       onUpdated?.();
       setActionSuccess('Booking checked out successfully.');
     } catch (error) {
@@ -176,7 +180,8 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
           <AssignGuestToBooking
             bookingId={booking._id}
-            onSuccess={() => {
+            onSuccess={async () => {
+              await loadBooking();
               setActionError('');
               onUpdated?.();
               setActionSuccess('Guest assignment updated successfully.');
