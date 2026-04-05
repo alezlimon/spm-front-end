@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
+import { useEffect, useState } from 'react';
+import { checkInBooking, checkOutBooking, getBookingById } from '../api/bookingsApi';
 import { formatDisplayDate } from '../utils/date';
 import AssignGuestToBooking from './AssignGuestToBooking';
-import { ErrorState } from './PageState';
+import { ErrorState, LoadingState } from './PageState';
 
 const getGuestLabel = (booking) => {
   if (!booking?.guest) {
@@ -26,20 +26,50 @@ const getRoomLabel = (booking) => {
   return room.roomNumber ? `Room ${room.roomNumber}` : room._id || '—';
 };
 
-export default function BookingDetailPage({ booking, onClose, onUpdated }) {
+export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
 
-  if (!booking) {
-    return null;
-  }
+  useEffect(() => {
+    const loadBooking = async () => {
+      if (!bookingId) {
+        setBooking(null);
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setLoadingError('');
+
+      try {
+        const bookingData = await getBookingById(bookingId);
+        setBooking(bookingData || null);
+      } catch (error) {
+        setLoadingError(error.message || 'Could not load booking details');
+        setBooking(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBooking();
+  }, [bookingId]);
 
   const handleCheckIn = async () => {
+    if (!booking?._id) {
+      return;
+    }
+
     setActionLoading(true);
     setActionError('');
 
     try {
       await checkInBooking(booking._id);
+      const freshBooking = await getBookingById(booking._id);
+      setBooking(freshBooking || booking);
       onUpdated?.();
     } catch (error) {
       setActionError(error.message || 'Could not check in booking');
@@ -49,11 +79,17 @@ export default function BookingDetailPage({ booking, onClose, onUpdated }) {
   };
 
   const handleCheckOut = async () => {
+    if (!booking?._id) {
+      return;
+    }
+
     setActionLoading(true);
     setActionError('');
 
     try {
       await checkOutBooking(booking._id);
+      const freshBooking = await getBookingById(booking._id);
+      setBooking(freshBooking || booking);
       onUpdated?.();
     } catch (error) {
       setActionError(error.message || 'Could not check out booking');
@@ -68,12 +104,19 @@ export default function BookingDetailPage({ booking, onClose, onUpdated }) {
         <div className="modal-header">
           <div>
             <h2>Booking Detail</h2>
-            <p className="modal-section-label">Reference {booking._id.slice(-6).toUpperCase()}</p>
+            <p className="modal-section-label">
+              {booking?._id ? `Reference ${booking._id.slice(-6).toUpperCase()}` : 'Reservation'}
+            </p>
           </div>
           <button className="modal-close" onClick={onClose} type="button" aria-label="Close">✕</button>
         </div>
 
         <div className="modal-body">
+          {loading && <LoadingState message="Loading booking details..." />}
+          {!loading && <ErrorState message={loadingError} />}
+
+          {!loading && !loadingError && booking && (
+            <>
           <div className="modal-pricing-summary">
             <div className="modal-pricing-row">
               <span>Guest</span>
@@ -127,10 +170,12 @@ export default function BookingDetailPage({ booking, onClose, onUpdated }) {
           <AssignGuestToBooking
             bookingId={booking._id}
             onSuccess={() => {
-              onUpdated?.();
               setActionError('');
+              onUpdated?.();
             }}
           />
+            </>
+          )}
         </div>
       </div>
     </div>

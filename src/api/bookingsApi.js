@@ -5,6 +5,13 @@ export async function listBookings() {
   return Array.isArray(data) ? data : [];
 }
 
+export async function getBookingById(bookingId) {
+  const data = await apiRequest(`/bookings/${bookingId}`, {
+    auth: true
+  });
+  return data || null;
+}
+
 export async function createBooking(payload) {
   return apiRequest('/bookings', {
     method: 'POST',

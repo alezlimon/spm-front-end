@@ -8,7 +8,7 @@ import NewBookingModal from './NewBookingModal';
 export default function BookingsPage() {
   const { propertyId } = useParams();
   const [showModal, setShowModal] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -40,7 +40,7 @@ export default function BookingsPage() {
 
       <BookingsTable
         refreshKey={refreshKey}
-        onViewBooking={(booking) => setSelectedBooking(booking)}
+        onViewBooking={(booking) => setSelectedBookingId(booking._id)}
       />
 
       {showModal && (
@@ -51,13 +51,13 @@ export default function BookingsPage() {
         />
       )}
 
-      {selectedBooking && (
+      {selectedBookingId && (
         <BookingDetailPage
-          booking={selectedBooking}
-          onClose={() => setSelectedBooking(null)}
+          bookingId={selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
           onUpdated={() => {
             setRefreshKey((k) => k + 1);
-            setSelectedBooking(null);
+            setSelectedBookingId(null);
           }}
         />
       )}
