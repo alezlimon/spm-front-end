@@ -15,7 +15,7 @@ const getEntityId = (value) => {
 
 const normalizeStatus = (status) => (status || '').toLowerCase();
 
-export default function BookingsTable({ refreshKey }) {
+export default function BookingsTable({ refreshKey, onViewBooking }) {
   const { propertyId } = useParams();
   const [bookings, setBookings] = useState([]);
   const [selectedDate, setSelectedDate] = useState(() => toInputDate(new Date()));
@@ -178,7 +178,12 @@ export default function BookingsTable({ refreshKey }) {
                     </span>
                   </td>
                   <td>
-                    <button className="secondary-button">View</button>
+                    <button
+                      className="secondary-button"
+                      onClick={() => onViewBooking?.(booking)}
+                    >
+                      View
+                    </button>
                   </td>
                 </tr>
               ))}

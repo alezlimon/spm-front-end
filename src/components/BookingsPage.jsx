@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import '../App.css';
+import BookingDetailPage from './BookingDetailPage';
 import BookingsTable from './BookingsTable';
 import NewBookingModal from './NewBookingModal';
 
 export default function BookingsPage() {
   const { propertyId } = useParams();
   const [showModal, setShowModal] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -36,13 +38,27 @@ export default function BookingsPage() {
         </button>
       </header>
 
-      <BookingsTable refreshKey={refreshKey} />
+      <BookingsTable
+        refreshKey={refreshKey}
+        onViewBooking={(booking) => setSelectedBooking(booking)}
+      />
 
       {showModal && (
         <NewBookingModal
           propertyId={propertyId}
           onClose={() => setShowModal(false)}
           onCreated={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
+
+      {selectedBooking && (
+        <BookingDetailPage
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          onUpdated={() => {
+            setRefreshKey((k) => k + 1);
+            setSelectedBooking(null);
+          }}
         />
       )}
     </div>

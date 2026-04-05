@@ -1,14 +1,138 @@
+import { useState } from 'react';
+import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
+import { formatDisplayDate } from '../utils/date';
 import AssignGuestToBooking from './AssignGuestToBooking';
+import { ErrorState } from './PageState';
 
-// Example bookingId for demonstration
-const exampleBookingId = 'REPLACE_WITH_A_REAL_BOOKING_ID';
+const getGuestLabel = (booking) => {
+  if (!booking?.guest) {
+    return 'Unassigned';
+  }
 
-export default function BookingDetailPage() {
+  return `${booking.guest.firstName || ''} ${booking.guest.lastName || ''}`.trim();
+};
+
+const getRoomLabel = (booking) => {
+  const room = booking?.room;
+
+  if (!room) {
+    return '—';
+  }
+
+  if (typeof room === 'string') {
+    return room;
+  }
+
+  return room.roomNumber ? `Room ${room.roomNumber}` : room._id || '—';
+};
+
+export default function BookingDetailPage({ booking, onClose, onUpdated }) {
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState('');
+
+  if (!booking) {
+    return null;
+  }
+
+  const handleCheckIn = async () => {
+    setActionLoading(true);
+    setActionError('');
+
+    try {
+      await checkInBooking(booking._id);
+      onUpdated?.();
+    } catch (error) {
+      setActionError(error.message || 'Could not check in booking');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCheckOut = async () => {
+    setActionLoading(true);
+    setActionError('');
+
+    try {
+      await checkOutBooking(booking._id);
+      onUpdated?.();
+    } catch (error) {
+      setActionError(error.message || 'Could not check out booking');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
-    <div style={{ maxWidth: 600, margin: '40px auto', padding: 24 }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: 24 }}>Booking Detail</h1>
-      {/* Other booking details would go here */}
-      <AssignGuestToBooking bookingId={exampleBookingId} />
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-panel" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-header">
+          <div>
+            <h2>Booking Detail</h2>
+            <p className="modal-section-label">Reference {booking._id.slice(-6).toUpperCase()}</p>
+          </div>
+          <button className="modal-close" onClick={onClose} type="button" aria-label="Close">✕</button>
+        </div>
+
+        <div className="modal-body">
+          <div className="modal-pricing-summary">
+            <div className="modal-pricing-row">
+              <span>Guest</span>
+              <strong>{getGuestLabel(booking)}</strong>
+            </div>
+            <div className="modal-pricing-row">
+              <span>Room</span>
+              <strong>{getRoomLabel(booking)}</strong>
+            </div>
+            <div className="modal-pricing-row">
+              <span>Check-in</span>
+              <strong>{formatDisplayDate(booking.checkIn || booking.checkInDate)}</strong>
+            </div>
+            <div className="modal-pricing-row">
+              <span>Check-out</span>
+              <strong>{formatDisplayDate(booking.checkOut || booking.checkOutDate)}</strong>
+            </div>
+            <div className="modal-pricing-row">
+              <span>Status</span>
+              <strong>{booking.status || 'Unknown'}</strong>
+            </div>
+            {typeof booking.totalPrice === 'number' && (
+              <div className="modal-pricing-row">
+                <span>Total price</span>
+                <strong>€{booking.totalPrice}</strong>
+              </div>
+            )}
+          </div>
+
+          <div className="login-action-row" style={{ marginBottom: '12px' }}>
+            <button
+              type="button"
+              className="primary-button"
+              disabled={actionLoading || booking.status === 'Checked-in'}
+              onClick={handleCheckIn}
+            >
+              {actionLoading ? 'Processing...' : 'Check in'}
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={actionLoading || booking.status !== 'Checked-in'}
+              onClick={handleCheckOut}
+            >
+              Check out
+            </button>
+          </div>
+
+          <ErrorState message={actionError} />
+
+          <AssignGuestToBooking
+            bookingId={booking._id}
+            onSuccess={() => {
+              onUpdated?.();
+              setActionError('');
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
