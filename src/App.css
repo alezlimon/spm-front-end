@@ -1658,6 +1658,13 @@ a {
   font-size: 0.68rem;
 }
 
+.room-bookings-actions .room-bookings-action-btn {
+  padding: 8px 12px;
+  min-width: 88px;
+  font-size: 0.78rem;
+  border-radius: 10px;
+}
+
 @media (min-width: 768px) {
   .app {
     padding: 30px 32px 46px;

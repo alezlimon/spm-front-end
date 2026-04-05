@@ -9,6 +9,8 @@ export default function RoomBookings({ roomId }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [actionFeedbackById, setActionFeedbackById] = useState({});
 
   const refreshBookings = useCallback(async () => {
     const data = await listRoomBookings(roomId);
@@ -51,26 +53,79 @@ export default function RoomBookings({ roomId }) {
             <span style={{color:'#6b7280'}}> {formatDisplayDate(b.checkIn)} to {formatDisplayDate(b.checkOut)}</span>
             <br/>
             <span style={{color:'#6b7280'}}>Status: {b.status}</span>
-            <div style={{marginTop:6,display:'flex',gap:8}}>
+            <div className="room-bookings-actions" style={{marginTop:6,display:'flex',gap:8}}>
               {canCheckIn(b.status) && (
                 <button
-                  style={{background:'#059669',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
+                  className="primary-button room-bookings-action-btn"
+                  disabled={actionLoadingId === b._id}
                   onClick={async () => {
-                    await checkInBooking(b._id);
-                    await refreshBookings();
+                    setActionLoadingId(b._id);
+                    setActionFeedbackById((prev) => ({ ...prev, [b._id]: null }));
+
+                    try {
+                      await checkInBooking(b._id);
+                      await refreshBookings();
+                      setActionFeedbackById((prev) => ({
+                        ...prev,
+                        [b._id]: { type: 'success', message: 'Checked in successfully.' }
+                      }));
+                    } catch (err) {
+                      setActionFeedbackById((prev) => ({
+                        ...prev,
+                        [b._id]: {
+                          type: 'error',
+                          message: err.message || 'Could not check in booking'
+                        }
+                      }));
+                    } finally {
+                      setActionLoadingId(null);
+                    }
                   }}
-                >Check-in</button>
+                >{actionLoadingId === b._id ? '...' : 'Check in'}</button>
               )}
               {canCheckOut(b.status) && (
                 <button
-                  style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
+                  className="primary-button room-bookings-action-btn"
+                  disabled={actionLoadingId === b._id}
                   onClick={async () => {
-                    await checkOutBooking(b._id);
-                    await refreshBookings();
+                    setActionLoadingId(b._id);
+                    setActionFeedbackById((prev) => ({ ...prev, [b._id]: null }));
+
+                    try {
+                      await checkOutBooking(b._id);
+                      await refreshBookings();
+                      setActionFeedbackById((prev) => ({
+                        ...prev,
+                        [b._id]: { type: 'success', message: 'Checked out successfully.' }
+                      }));
+                    } catch (err) {
+                      setActionFeedbackById((prev) => ({
+                        ...prev,
+                        [b._id]: {
+                          type: 'error',
+                          message: err.message || 'Could not check out booking'
+                        }
+                      }));
+                    } finally {
+                      setActionLoadingId(null);
+                    }
                   }}
-                >Check-out</button>
+                >{actionLoadingId === b._id ? '...' : 'Check out'}</button>
               )}
             </div>
+
+            {actionFeedbackById[b._id] && (
+              <p
+                className={
+                  actionFeedbackById[b._id].type === 'error'
+                    ? 'form-feedback form-feedback-error'
+                    : 'form-feedback form-feedback-success'
+                }
+                style={{ marginTop: '8px' }}
+              >
+                {actionFeedbackById[b._id].message}
+              </p>
+            )}
           </li>
         ))}
       </ul>
