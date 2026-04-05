@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { checkInBooking, checkOutBooking, listBookings, listBookingsPage } from '../api/bookingsApi';
+import {
+  BOOKINGS_QUERY_MODE,
+  checkInBooking,
+  checkOutBooking,
+  listBookings,
+  listBookingsPage
+} from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { EmptyState, ErrorState, LoadingState } from '../components/PageState';
@@ -338,6 +344,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
         </div>
 
         <p>Track reservations for the selected day and filter by status.</p>
+        {import.meta.env.DEV && (
+          <p className="bookings-dev-hint">
+            Query mode: <strong>{BOOKINGS_QUERY_MODE}</strong>
+          </p>
+        )}
       </div>
 
       {loading && <LoadingState message="Loading bookings..." />}

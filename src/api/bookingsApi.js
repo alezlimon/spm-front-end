@@ -1,7 +1,16 @@
 import { apiRequest } from './client';
 
 const MAX_ALL_BOOKINGS_PAGES = 50;
-const BOOKINGS_QUERY_MODE = (import.meta.env.VITE_BOOKINGS_QUERY_MODE || 'compat').toLowerCase();
+const VALID_BOOKINGS_QUERY_MODES = new Set(['compat', 'date', 'range']);
+const RAW_BOOKINGS_QUERY_MODE = (import.meta.env.VITE_BOOKINGS_QUERY_MODE || 'compat').toLowerCase();
+
+export const BOOKINGS_QUERY_MODE = VALID_BOOKINGS_QUERY_MODES.has(RAW_BOOKINGS_QUERY_MODE)
+  ? RAW_BOOKINGS_QUERY_MODE
+  : 'compat';
+
+if (import.meta.env.DEV) {
+  console.info(`[bookingsApi] query mode: ${BOOKINGS_QUERY_MODE}`);
+}
 
 const toPositiveNumber = (value, fallback) => {
   const parsed = Number(value);

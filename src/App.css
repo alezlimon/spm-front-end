@@ -1566,6 +1566,19 @@ a {
   color: #a89d92;
 }
 
+.bookings-dev-hint {
+  margin-top: 6px;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: #c8beb4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bookings-dev-hint strong {
+  color: #f7f2eb;
+}
+
 .ops-errors-card {
   margin-bottom: 12px;
   background: rgba(227, 109, 97, 0.1);
