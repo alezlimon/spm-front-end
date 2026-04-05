@@ -116,6 +116,6 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 
 ## 10) Siguiente bloque FE (pendiente)
 
-- [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12).
+- [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12) usando `docs/STAGING-VALIDATION-RUNBOOK.md`.
 - [x] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
-- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range` y completar log de validacion.
+- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range` y completar log de validacion en `docs/STAGING-VALIDATION-RUNBOOK.md`.
