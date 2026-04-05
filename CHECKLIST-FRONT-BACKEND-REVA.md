@@ -105,6 +105,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Flujo de booking detail con acciones operativas unificadas y mensajes consistentes.
 - [x] Tabla de bookings preparada para filtros/paginacion server-side con fallback cliente.
 - [x] Proteccion contra respuestas obsoletas en bookings table (abort + stale guard).
+- [x] Capa de compatibilidad de query params para bookings (`date`/`from`/`to`) con switch por entorno.
 
 ## 10) Siguiente bloque FE (sin bloqueo)
 
@@ -114,3 +115,4 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
 - [ ] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).
 - [x] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).
+- [ ] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.

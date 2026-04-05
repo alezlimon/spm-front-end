@@ -1,16 +1,55 @@
 import { apiRequest } from './client';
 
 const MAX_ALL_BOOKINGS_PAGES = 50;
+const BOOKINGS_QUERY_MODE = (import.meta.env.VITE_BOOKINGS_QUERY_MODE || 'compat').toLowerCase();
 
 const toPositiveNumber = (value, fallback) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
+const normalizeBookingsQueryParams = (params = {}) => {
+  const normalized = { ...params };
+  const date = normalized.date;
+  const hasFrom = normalized.from !== undefined && normalized.from !== null && normalized.from !== '';
+  const hasTo = normalized.to !== undefined && normalized.to !== null && normalized.to !== '';
+
+  if (BOOKINGS_QUERY_MODE === 'range') {
+    if (date && !hasFrom) {
+      normalized.from = date;
+    }
+
+    if (date && !hasTo) {
+      normalized.to = date;
+    }
+
+    delete normalized.date;
+    return normalized;
+  }
+
+  if (BOOKINGS_QUERY_MODE === 'date') {
+    delete normalized.from;
+    delete normalized.to;
+    return normalized;
+  }
+
+  // compat mode: send both date and range keys when possible.
+  if (date && !hasFrom) {
+    normalized.from = date;
+  }
+
+  if (date && !hasTo) {
+    normalized.to = date;
+  }
+
+  return normalized;
+};
+
 const buildBookingsQuery = (params = {}) => {
+  const normalizedParams = normalizeBookingsQueryParams(params);
   const query = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(normalizedParams).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '' || value === 'all') {
       return;
     }
