@@ -4,6 +4,7 @@ import { listAllBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms, updateRoom } from '../api/roomsApi';
 import BookingDetailPage from './BookingDetailPage';
+import NewBookingModal from './NewBookingModal';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
 import RoomCard from './RoomCard';
 import RoomsTimelineView from './RoomsTimelineView';
@@ -13,8 +14,10 @@ export default function RoomsPage() {
   const { propertyId } = useParams();
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState('timeline');
   const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +44,7 @@ export default function RoomsPage() {
     };
 
     fetchData();
-  }, [propertyId]);
+  }, [propertyId, refreshKey]);
 
   const updateRoomStatus = async (roomId, newStatus, extraPayload = {}) => {
     const payload = { status: newStatus, ...extraPayload };
@@ -152,25 +155,45 @@ export default function RoomsPage() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>Rooms</h1>
-        <p>Run front desk operations fast: know what is ready, blocked, occupied, or out of service.</p>
-        <div className="rooms-view-toggle" role="tablist" aria-label="Rooms view mode">
-          <button
-            type="button"
-            className={viewMode === 'timeline' ? 'active' : ''}
-            onClick={() => setViewMode('timeline')}
-          >
-            Timeline
-          </button>
-          <button
-            type="button"
-            className={viewMode === 'cards' ? 'active' : ''}
-            onClick={() => setViewMode('cards')}
-          >
-            Cards
-          </button>
+      <header className="header bookings-page-header-row">
+        <div>
+          <h1>Rooms</h1>
+          <p>Run front desk operations fast: know what is ready, blocked, occupied, or out of service.</p>
+          <div className="rooms-view-toggle" role="tablist" aria-label="Rooms view mode">
+            <button
+              type="button"
+              className={viewMode === 'timeline' ? 'active' : ''}
+              onClick={() => setViewMode('timeline')}
+            >
+              Timeline
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'cards' ? 'active' : ''}
+              onClick={() => setViewMode('cards')}
+            >
+              Cards
+            </button>
+          </div>
         </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setShowModal(true)}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            style={{ marginRight: '7px' }}
+          >
+            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+          New reservation
+        </button>
       </header>
 
       <div className="rooms-layout">
@@ -271,6 +294,18 @@ export default function RoomsPage() {
           onClose={() => setSelectedBookingId(null)}
           onUpdated={() => {
             setSelectedBookingId(null);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
+
+      {showModal && (
+        <NewBookingModal
+          propertyId={propertyId}
+          onClose={() => setShowModal(false)}
+          onCreated={() => {
+            setShowModal(false);
+            setRefreshKey((k) => k + 1);
           }}
         />
       )}

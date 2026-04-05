@@ -68,6 +68,11 @@ const tabsStyle = {
   gap: '2px'
 };
 
+const billingTabStyle = ({ isActive }) => ({
+  ...getTabStyle({ isActive }),
+  marginLeft: '18px'
+});
+
 const getTabStyle = ({ isActive }) => ({
   color: isActive ? '#FFFFFF' : 'rgba(245, 247, 250, 0.54)',
   textDecoration: 'none',
@@ -121,11 +126,11 @@ export default function PropertyLayout() {
             <NavLink to={`/properties/${propertyId}/rooms`} style={getTabStyle}>
               Rooms
             </NavLink>
-            <NavLink to={`/properties/${propertyId}/billing`} style={getTabStyle}>
-              Billing
-            </NavLink>
             <NavLink to={`/properties/${propertyId}/guests`} style={getTabStyle}>
               Guests
+            </NavLink>
+            <NavLink to={`/properties/${propertyId}/billing`} style={billingTabStyle}>
+              Billing
             </NavLink>
           </div>
         </div>

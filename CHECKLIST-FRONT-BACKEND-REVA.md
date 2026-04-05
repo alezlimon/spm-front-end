@@ -79,9 +79,6 @@ Un modulo se considera listo para frontend si cumple todo:
 - [ ] Reglas de negocio aplicadas en backend.
 - [ ] Caso feliz + 2 casos de error validados con FE.
 
-## 7) Mensaje rapido para enviar al backend
-
-Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la mayor parte de la logica al backend. Priorizamos cerrar esta semana: (1) error envelope unico, (2) validaciones de negocio de bookings en servidor (anti-overbooking, capacidad, transiciones), (3) contrato determinista para duplicados de guest y (4) ruta canonica de auth. Con eso nosotros cerramos MVP FE sin parches fragiles. Si os parece, hacemos seguimiento diario corto de bloqueantes y congelamos contrato por sprint para evitar breaking changes de ultima hora.
 
 ## 8) Cadencia FE-BE (activa)
 
@@ -90,6 +87,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Backend confirmo y congelo contrato de booking detail para este sprint (`GET /api/bookings/:id` autenticado).
 - [x] Backend confirmo `MODE: range` para staging en query params de bookings.
 - [x] Backend confirmo prefijo canonico de auth: `/auth/*` (`/api/auth/*` queda legacy temporal hasta post-freeze).
+- [x] Backend confirmo y congelo contrato MVP de billing: `GET /api/invoices`, `GET /api/invoices/:id`, `POST /api/invoices`, `POST /api/invoices/:id/payments`.
 - [ ] Sign-off de filtros/paginacion de bookings pendiente: contrato backend aun no congelado.
 - [ ] Revalidar en staging para eliminar fallback de traduccion FE definitivamente (objetivo: 2026-04-12).
 - [x] Fallback de traduccion FE desactivado por defecto y solo habilitable por flag temporal.
@@ -115,6 +113,8 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Limite configurable de paginas en `listAllBookings` para evitar carga excesiva (`VITE_MAX_ALL_BOOKINGS_PAGES`).
 - [x] Vista de bookings por propiedad usa fetch paginated-safe (evita lista vacia con respuesta paginada).
 - [x] Auth base URL configurable por entorno (`VITE_AUTH_URL`) para cambiar `/auth` vs `/api/auth` sin tocar codigo.
+- [x] Billing MVP FE publicado con ruta por propiedad, tabla operativa, detalle de invoice, registro de pagos y feature flags.
+- [x] Billing API adapter preparado con fallback mock temporal hasta que backend publique endpoints reales.
 
 ## 10) Siguiente bloque FE (pendiente)
 
@@ -130,5 +130,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Reglas de display bloqueadas en FE segun confirmacion backend: `UTC` + `EUR` + rounding half-up (2 decimales).
 - [x] Consumo de snapshot pricing en booking detail preparado detras de feature switch (`VITE_ENABLE_BOOKING_PRICING_SNAPSHOT=false` por defecto).
 - [x] Scaffold de badge para `paymentStatus` listo en Booking Detail y Bookings Table (render condicional si backend lo envia).
-- [ ] Congelar contrato backend de currency/rounding y snapshot de pricing.
-- [ ] Definir enum y transiciones de estado de pago.
+- [x] Congelar contrato backend de currency/rounding para billing: `EUR` + `UTC` + rounding half-up (2 decimales).
+- [x] Congelar set inicial de estados de invoice: `draft`, `issued`, `partially_paid`, `paid`, `void`, `overdue`.
+- [ ] Implementacion backend de endpoints billing pendiente; FE mantiene mock fallback temporal hasta go-live.
+- [ ] Congelar snapshot de pricing persistido por invoice en backend y validar payload real contra adapter FE.
