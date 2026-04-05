@@ -107,12 +107,11 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Proteccion contra respuestas obsoletas en bookings table (abort + stale guard).
 - [x] Capa de compatibilidad de query params para bookings (`date`/`from`/`to`) con switch por entorno.
 - [x] Diagnostico dev del modo de query bookings visible en runtime.
+- [x] Guia FE-BE de debug para query mode de bookings publicada (`docs/BOOKINGS-QUERY-MODE-DEBUG.md`).
+- [x] Limite configurable de paginas en `listAllBookings` para evitar carga excesiva (`VITE_MAX_ALL_BOOKINGS_PAGES`).
 
-## 10) Siguiente bloque FE (sin bloqueo)
+## 10) Siguiente bloque FE (pendiente)
 
-- [x] Robustecer feedback en quick actions (success/error por fila en tabla).
-- [x] Homogeneizar estilos de botones operativos en bookings y room history.
-- [ ] Remover fallback de traduccion FE tras validacion de staging (2026-04-12).
-- [x] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
-- [x] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).
+- [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12).
 - [ ] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
+- [ ] Compartir y validar con backend ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` en staging.

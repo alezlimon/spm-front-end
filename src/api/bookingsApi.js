@@ -1,6 +1,11 @@
 import { apiRequest } from './client';
 
-const MAX_ALL_BOOKINGS_PAGES = 50;
+const parsePositiveEnvInt = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+};
+
+const MAX_ALL_BOOKINGS_PAGES = parsePositiveEnvInt(import.meta.env.VITE_MAX_ALL_BOOKINGS_PAGES, 50);
 const VALID_BOOKINGS_QUERY_MODES = new Set(['compat', 'date', 'range']);
 const RAW_BOOKINGS_QUERY_MODE = (import.meta.env.VITE_BOOKINGS_QUERY_MODE || 'compat').toLowerCase();
 
@@ -69,6 +74,9 @@ const buildBookingsQuery = (params = {}) => {
   const queryString = query.toString();
   return queryString ? `?${queryString}` : '';
 };
+
+export const buildBookingsQueryString = (params = {}) => buildBookingsQuery(params);
+export const buildBookingsDebugPath = (params = {}) => `/api/bookings${buildBookingsQuery(params)}`;
 
 const normalizeBookingsPage = (payload, params = {}) => {
   const page = toPositiveNumber(params.page, 1);
@@ -147,6 +155,13 @@ export async function listAllBookings(params = {}, options = {}) {
 
   let allItems = [...(firstPage.items || [])];
   const cappedTotalPages = Math.min(firstPage.totalPages, MAX_ALL_BOOKINGS_PAGES);
+
+  if (import.meta.env.DEV && cappedTotalPages < firstPage.totalPages) {
+    console.warn(
+      `[bookingsApi] listAllBookings truncated at ${MAX_ALL_BOOKINGS_PAGES} pages.`
+      + ` Received ${firstPage.totalPages} pages from backend.`
+    );
+  }
 
   for (let page = 2; page <= cappedTotalPages; page += 1) {
     const pageResult = await listBookingsPage(

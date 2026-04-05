@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   BOOKINGS_QUERY_MODE,
+  buildBookingsDebugPath,
   checkInBooking,
   checkOutBooking,
   listBookings,
@@ -36,9 +37,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [actionLoadingById, setActionLoadingById] = useState({});
   const [actionFeedbackById, setActionFeedbackById] = useState({});
   const [recentActionErrors, setRecentActionErrors] = useState([]);
+  const [copiedQueryState, setCopiedQueryState] = useState('');
   const feedbackTimeoutsRef = useRef({});
   const requestSequenceRef = useRef(0);
   const activeRequestControllerRef = useRef(null);
+  const queryCopyTimeoutRef = useRef(null);
 
   const setRowFeedback = (bookingId, feedback) => {
     if (feedbackTimeoutsRef.current[bookingId]) {
@@ -181,6 +184,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
         activeRequestControllerRef.current.abort();
         activeRequestControllerRef.current = null;
       }
+
+      if (queryCopyTimeoutRef.current) {
+        clearTimeout(queryCopyTimeoutRef.current);
+        queryCopyTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -297,6 +305,41 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
     }
   }, [currentPage, effectiveTotalPages]);
 
+  const queryPreviewPath = propertyId
+    ? '/api/bookings (property-scoped view applies local room filtering)'
+    : buildBookingsDebugPath({
+      status: statusFilter,
+      date: selectedDate,
+      page: currentPage,
+      limit: DEFAULT_PAGE_SIZE
+    });
+
+  const handleCopyQueryPreview = async () => {
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
+    if (!navigator?.clipboard?.writeText) {
+      setCopiedQueryState('Clipboard not available');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(queryPreviewPath);
+      setCopiedQueryState('Copied');
+    } catch {
+      setCopiedQueryState('Copy failed');
+    }
+
+    if (queryCopyTimeoutRef.current) {
+      clearTimeout(queryCopyTimeoutRef.current);
+    }
+
+    queryCopyTimeoutRef.current = setTimeout(() => {
+      setCopiedQueryState('');
+    }, 1600);
+  };
+
   return (
     <div className="bookings-table-wrapper">
       <div className="bookings-table-header">
@@ -345,9 +388,26 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
         <p>Track reservations for the selected day and filter by status.</p>
         {import.meta.env.DEV && (
-          <p className="bookings-dev-hint">
-            Query mode: <strong>{BOOKINGS_QUERY_MODE}</strong>
-          </p>
+          <div className="bookings-dev-hint" role="status" aria-live="polite">
+            <p>
+              Query mode: <strong>{BOOKINGS_QUERY_MODE}</strong>
+            </p>
+
+            <div className="bookings-dev-path-row">
+              <span className="bookings-dev-path">{queryPreviewPath}</span>
+              <button
+                type="button"
+                className="secondary-button bookings-dev-copy-btn"
+                onClick={handleCopyQueryPreview}
+              >
+                {copiedQueryState === 'Copied' ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+
+            {copiedQueryState && copiedQueryState !== 'Copied' && (
+              <span className="bookings-dev-copy-status">{copiedQueryState}</span>
+            )}
+          </div>
         )}
       </div>
 

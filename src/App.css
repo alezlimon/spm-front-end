@@ -1568,6 +1568,12 @@ a {
 
 .bookings-dev-hint {
   margin-top: 6px;
+  display: grid;
+  gap: 4px;
+}
+
+.bookings-dev-hint p {
+  margin: 0;
   font-size: 0.76rem;
   line-height: 1.35;
   color: #c8beb4;
@@ -1577,6 +1583,33 @@ a {
 
 .bookings-dev-hint strong {
   color: #f7f2eb;
+}
+
+.bookings-dev-path-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bookings-dev-path {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #d9d2ca;
+}
+
+.bookings-dev-copy-btn {
+  min-width: 70px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+}
+
+.bookings-dev-copy-status {
+  font-size: 0.72rem;
+  color: #e8b9b2;
 }
 
 .ops-errors-card {
