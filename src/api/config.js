@@ -14,7 +14,11 @@ export const API_URL = trimTrailingSlash(
   normalizeProtocol(import.meta.env.VITE_API_URL || DEFAULT_API_URL)
 );
 
-export const AUTH_URL = API_URL.replace(/\/api\/?$/i, '/auth');
+const DEFAULT_AUTH_URL = API_URL.replace(/\/api\/?$/i, '/auth');
+
+export const AUTH_URL = trimTrailingSlash(
+  normalizeProtocol(import.meta.env.VITE_AUTH_URL || DEFAULT_AUTH_URL)
+);
 
 export const buildApiUrl = (path = '') => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;

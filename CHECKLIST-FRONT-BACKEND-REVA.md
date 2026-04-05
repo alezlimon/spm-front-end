@@ -112,6 +112,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Guia FE-BE de debug para query mode de bookings publicada (`docs/BOOKINGS-QUERY-MODE-DEBUG.md`).
 - [x] Limite configurable de paginas en `listAllBookings` para evitar carga excesiva (`VITE_MAX_ALL_BOOKINGS_PAGES`).
 - [x] Vista de bookings por propiedad usa fetch paginated-safe (evita lista vacia con respuesta paginada).
+- [x] Auth base URL configurable por entorno (`VITE_AUTH_URL`) para cambiar `/auth` vs `/api/auth` sin tocar codigo.
 
 ## 10) Siguiente bloque FE (pendiente)
 
