@@ -100,6 +100,32 @@ Use one label per checkpoint:
 - `Pending contract`: endpoint/contract behavior not frozen yet.
 - `Blocked by missing endpoint`: cannot validate because backend capability is not available.
 
+## Live session worksheet (to fill during call)
+
+Session metadata:
+
+- Date/time:
+- FE owner:
+- BE owner:
+- Staging FE URL:
+- Staging BE base URL:
+- Backend commit/tag:
+
+Checkpoint outcomes:
+
+| Checkpoint | Result (`Pass` / `Pending contract` / `Blocked by missing endpoint`) | Evidence (request/log/screenshot note) | Owner | ETA |
+| --- | --- | --- | --- | --- |
+| 1) Query mode + request shape (`from`/`to`) |  |  |  |  |
+| 2) Bookings filters + pagination behavior |  |  |  |  |
+| 3) Property-scoped bookings behavior |  |  |  |  |
+| 4) Legacy translation fallback can stay off |  |  |  |  |
+
+Sign-off decision:
+
+- Overall staging validation result:
+- Blocking items (if any):
+- Next sync date:
+
 ## Latest validation snapshot (2026-04-05)
 
 Source: backend confirmation + FE readiness review.
