@@ -87,6 +87,8 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 
 - [x] Sync diario corto FE-BE para bloqueantes.
 - [x] Backend compartio DoD de errores para endpoints prioritarios (2026-04-05).
+- [x] Backend confirmo y congelo contrato de booking detail para este sprint (`GET /api/bookings/:id` autenticado).
+- [x] Backend confirmo `MODE: range` para staging en query params de bookings.
 - [ ] Revalidar en staging para eliminar fallback de traduccion FE definitivamente (objetivo: 2026-04-12).
 - [x] Fallback de traduccion FE desactivado por defecto y solo habilitable por flag temporal.
 
@@ -113,5 +115,5 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 ## 10) Siguiente bloque FE (pendiente)
 
 - [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12).
-- [ ] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
-- [ ] Compartir y validar con backend ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` en staging.
+- [x] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
+- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range`.
