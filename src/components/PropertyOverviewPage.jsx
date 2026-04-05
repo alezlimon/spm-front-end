@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getProperty, getPropertyOverview } from '../api/propertiesApi';
 import '../App.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function PropertyOverviewPage() {
   const { propertyId } = useParams();
@@ -17,23 +16,14 @@ export default function PropertyOverviewPage() {
       setError('');
 
       try {
-        const [propertyRes, overviewRes] = await Promise.all([
-          fetch(`${API_URL}/properties/${propertyId}`),
-          fetch(`${API_URL}/properties/${propertyId}/overview`)
-        ]);
-
-        if (!propertyRes.ok || !overviewRes.ok) {
-          throw new Error('Could not load overview data');
-        }
-
         const [propertyData, overviewData] = await Promise.all([
-          propertyRes.json(),
-          overviewRes.json()
+          getProperty(propertyId),
+          getPropertyOverview(propertyId)
         ]);
 
-        setProperty(propertyData?.property || propertyData || null);
+        setProperty(propertyData || null);
         setOverview(overviewData || null);
-      } catch (err) {
+      } catch {
         setError('Could not load overview data');
       } finally {
         setLoading(false);

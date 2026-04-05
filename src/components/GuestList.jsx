@@ -1,7 +1,7 @@
 import { useState } from 'react';
+import { updateGuest } from '../api/guestsApi';
 import EditGuestForm from './EditGuestForm';
 import '../App.css';
-import { getAuthHeaders } from '../utils/auth';
 
 export default function GuestList({ guests, onGuestUpdated }) {
   const [editingId, setEditingId] = useState(null);
@@ -14,17 +14,7 @@ export default function GuestList({ guests, onGuestUpdated }) {
   const handleCancel = () => setEditingId(null);
 
   const handleSave = async (id, updatedData) => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
-
-    const res = await fetch(`${API_URL}/guests/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify(updatedData)
-    });
-
-    if (!res.ok) {
-      throw new Error('Could not update guest');
-    }
+    await updateGuest(id, updatedData);
 
     setEditingId(null);
 

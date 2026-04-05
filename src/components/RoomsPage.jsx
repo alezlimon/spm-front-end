@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { listBookings } from '../api/bookingsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
+import { listRooms, updateRoom } from '../api/roomsApi';
 import RoomCard from './RoomCard';
 import '../App.css';
-import { getAuthHeaders } from '../utils/auth';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function RoomsPage() {
   const { propertyId } = useParams();
@@ -21,25 +21,14 @@ export default function RoomsPage() {
       setError('');
 
       try {
-        const roomsUrl = propertyId
-          ? `${API_URL}/properties/${propertyId}/rooms`
-          : `${API_URL}/rooms`;
-
-        const [roomsRes, bookingsRes] = await Promise.all([
-          fetch(roomsUrl),
-          fetch(`${API_URL}/bookings`)
+        const [roomsData, bookingsData] = await Promise.all([
+          propertyId ? listPropertyRooms(propertyId) : listRooms(),
+          listBookings()
         ]);
-
-        if (!roomsRes.ok || !bookingsRes.ok) {
-          throw new Error('Error fetching room data');
-        }
-
-        const roomsData = await roomsRes.json();
-        const bookingsData = await bookingsRes.json();
 
         setRooms(roomsData);
         setBookings(bookingsData);
-      } catch (err) {
+      } catch {
         setError('Could not load rooms');
       } finally {
         setLoading(false);
@@ -59,19 +48,7 @@ export default function RoomsPage() {
 
   const updateRoomStatus = async (roomId, newStatus) => {
     try {
-      const res = await fetch(`${API_URL}/rooms/${roomId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders({
-          'Content-Type': 'application/json'
-        }),
-        body: JSON.stringify({ status: newStatus })
-      });
-
-      if (!res.ok) {
-        throw new Error('Could not update room');
-      }
-
-      const updatedRoom = await res.json();
+      const updatedRoom = await updateRoom(roomId, { status: newStatus });
 
       setRooms((prevRooms) =>
         prevRooms.map((room) =>

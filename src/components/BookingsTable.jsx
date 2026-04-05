@@ -1,23 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { listBookings } from '../api/bookingsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
+import { listRooms } from '../api/roomsApi';
+import { formatDisplayDate, toInputDate } from '../utils/date';
 import '../App.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 const getEntityId = (value) => {
   if (!value) return null;
   if (typeof value === 'string') return value;
   return value._id || value.id || null;
-};
-
-const toInputDate = (dateValue) => {
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return '';
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 };
 
 const normalizeStatus = (status) => (status || '').toLowerCase();
@@ -36,20 +28,9 @@ export default function BookingsTable({ refreshKey }) {
       setError('');
 
       try {
-        const [roomsRes, bookingsRes] = await Promise.all([
-          propertyId
-            ? fetch(`${API_URL}/properties/${propertyId}/rooms`)
-            : fetch(`${API_URL}/rooms`),
-          fetch(`${API_URL}/bookings`)
-        ]);
-
-        if (!roomsRes.ok || !bookingsRes.ok) {
-          throw new Error('Error fetching bookings');
-        }
-
         const [roomsData, bookingsData] = await Promise.all([
-          roomsRes.json(),
-          bookingsRes.json()
+          propertyId ? listPropertyRooms(propertyId) : listRooms(),
+          listBookings()
         ]);
 
         const roomIds = new Set((roomsData || []).map((room) => room._id));
@@ -68,11 +49,6 @@ export default function BookingsTable({ refreshKey }) {
 
     fetchBookings();
   }, [propertyId, refreshKey]);
-
-  const formatDate = (dateValue) => {
-    if (!dateValue) return '—';
-    return new Date(dateValue).toLocaleDateString();
-  };
 
   const getGuestName = (booking) => {
     if (!booking.guest) return 'Unassigned';
@@ -193,8 +169,8 @@ export default function BookingsTable({ refreshKey }) {
                   <td className="booking-reference">{booking._id.slice(-6).toUpperCase()}</td>
                   <td>{getGuestName(booking)}</td>
                   <td>{getRoomLabel(booking)}</td>
-                  <td>{formatDate(booking.checkIn || booking.checkInDate)}</td>
-                  <td>{formatDate(booking.checkOut || booking.checkOutDate)}</td>
+                  <td>{formatDisplayDate(booking.checkIn || booking.checkInDate)}</td>
+                  <td>{formatDisplayDate(booking.checkOut || booking.checkOutDate)}</td>
                   <td>
                     <span className={`status-badge ${getStatusClass(booking.status)}`}>
                       {booking.status || 'Unknown'}

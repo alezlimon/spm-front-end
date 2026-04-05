@@ -1,16 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getAuthHeaders } from '../utils/auth';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import { getErrorMessage } from '../api/client';
+import { createBooking } from '../api/bookingsApi';
+import { createGuest, listGuests } from '../api/guestsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
+import { toInputDate } from '../utils/date';
 const BREAKFAST_PRICE = 15;
-
-const toInputDate = (date = new Date()) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 const calcNights = (checkIn, checkOut) => {
   if (!checkIn || !checkOut) return 0;
@@ -69,9 +63,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
       setRoomsError('');
       setSelectedRoom(null);
       try {
-        const res = await fetch(`${API_URL}/properties/${propertyId}/rooms`);
-        if (!res.ok) throw new Error('Could not load rooms');
-        const data = await res.json();
+        const data = await listPropertyRooms(propertyId);
         setRooms((data || []).filter((r) => r.status === 'Available'));
       } catch (err) {
         setRoomsError(err.message || 'Error loading rooms');
@@ -90,9 +82,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`${API_URL}/guests/search?query=${encodeURIComponent(guestSearch)}`);
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await listGuests(guestSearch);
         setSearchResults(data || []);
       } catch {
         // ignore
@@ -133,26 +123,9 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
       return 'Session expired - please log in again';
     }
     if (status === 400) {
-      if (typeof data?.message === 'string' && data.message.trim()) {
-        return data.message;
-      }
-      if (typeof data?.error === 'string' && data.error.trim()) {
-        return data.error;
-      }
-      if (Array.isArray(data?.details) && data.details.length > 0) {
-        const detail = data.details[0];
-        if (typeof detail === 'string') return detail;
-        if (detail?.msg) return detail.msg;
-      }
-      if (Array.isArray(data?.errors) && data.errors.length > 0) {
-        const firstError = data.errors[0];
-        if (typeof firstError === 'string') return firstError;
-        if (firstError?.message) return firstError.message;
-        if (firstError?.msg) return firstError.msg;
-      }
-      return 'Invalid data provided';
+      return getErrorMessage(data, 'Invalid data provided');
     }
-    return data?.message || 'Request failed';
+    return getErrorMessage(data, 'Request failed');
   };
 
   const handleSubmit = async () => {
@@ -177,21 +150,10 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         const compBody = { ...companion };
         if (!compBody.email) delete compBody.email;
         if (!compBody.phone) delete compBody.phone;
-        const compRes = await fetch(`${API_URL}/guests`, {
-          method: 'POST',
-          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(compBody),
-        });
-
-        let compData;
         try {
-          compData = await compRes.json();
-        } catch {
-          throw new Error('Invalid response from server while creating companion');
-        }
-
-        if (!compRes.ok) {
-          throw new Error(`Companion: ${parseErrorMessage(compRes.status, compData)}`);
+          await createGuest(compBody);
+        } catch (error) {
+          throw new Error(`Companion: ${parseErrorMessage(error.status, error.payload)}`);
         }
       }
 
@@ -215,21 +177,10 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         bookingPayload.guestId = selectedGuest._id;
       }
 
-      const bookingRes = await fetch(`${API_URL}/bookings`, {
-        method: 'POST',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(bookingPayload),
-      });
-
-      let bookingData;
       try {
-        bookingData = await bookingRes.json();
-      } catch {
-        throw new Error('Invalid response from server');
-      }
-
-      if (!bookingRes.ok) {
-        throw new Error(parseErrorMessage(bookingRes.status, bookingData));
+        await createBooking(bookingPayload);
+      } catch (error) {
+        throw new Error(parseErrorMessage(error.status, error.payload));
       }
 
       onCreated();

@@ -22,8 +22,8 @@ export default function EditGuestForm({ guest, onSave, onCancel }) {
     setError('');
     try {
       await onSave(form);
-    } catch (err) {
-      setError('No se pudo guardar el huésped');
+    } catch {
+      setError('Could not save guest');
     } finally {
       setLoading(false);
     }

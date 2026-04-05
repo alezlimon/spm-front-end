@@ -7,7 +7,7 @@ import PropertiesPage from './components/PropertiesPage';
 import Navbar from './components/Navbar';
 import PropertyLayout from './components/PropertyLayout';
 import PropertyOverviewPage from './components/PropertyOverviewPage';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuth();

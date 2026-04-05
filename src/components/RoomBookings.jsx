@@ -1,23 +1,35 @@
-import { useEffect, useState } from 'react';
-import { getAuthHeaders } from '../utils/auth';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import { useCallback, useEffect, useState } from 'react';
+import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
+import { listRoomBookings } from '../api/roomsApi';
 
 export default function RoomBookings({ roomId }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const refreshBookings = useCallback(async () => {
+    const data = await listRoomBookings(roomId);
+    setBookings(data || []);
+  }, [roomId]);
+
   useEffect(() => {
     if (!roomId) return;
-    setLoading(true);
-    setError('');
-    fetch(`${API_URL}/rooms/${roomId}/bookings`)
-      .then(res => res.json())
-      .then(data => setBookings(data))
-      .catch(() => setError('Could not load bookings'))
-      .finally(() => setLoading(false));
-  }, [roomId]);
+
+    const loadBookings = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        await refreshBookings();
+      } catch {
+        setError('Could not load bookings');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBookings();
+  }, [roomId, refreshBookings]);
 
   if (!roomId) return null;
 
@@ -38,12 +50,8 @@ export default function RoomBookings({ roomId }) {
                 <button
                   style={{background:'#059669',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
                   onClick={async () => {
-                    await fetch(`${API_URL}/bookings/${b._id}/checkin`, {
-                      method: 'PUT',
-                      headers: getAuthHeaders()
-                    });
-                    // Refresh bookings
-                    fetch(`${API_URL}/rooms/${roomId}/bookings`).then(res => res.json()).then(setBookings);
+                    await checkInBooking(b._id);
+                    await refreshBookings();
                   }}
                 >Check-in</button>
               )}
@@ -51,12 +59,8 @@ export default function RoomBookings({ roomId }) {
                 <button
                   style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:6,padding:'4px 10px',fontWeight:600,cursor:'pointer'}}
                   onClick={async () => {
-                    await fetch(`${API_URL}/bookings/${b._id}/checkout`, {
-                      method: 'PUT',
-                      headers: getAuthHeaders()
-                    });
-                    // Refresh bookings
-                    fetch(`${API_URL}/rooms/${roomId}/bookings`).then(res => res.json()).then(setBookings);
+                    await checkOutBooking(b._id);
+                    await refreshBookings();
                   }}
                 >Check-out</button>
               )}

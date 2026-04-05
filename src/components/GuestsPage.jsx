@@ -1,15 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { listBookings } from '../api/bookingsApi';
+import { listGuests } from '../api/guestsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
 import NewGuestForm from './NewGuestForm';
 import GuestList from './GuestList';
 import '../App.css';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 const getEntityId = (value) => {
   if (!value) return null;
   if (typeof value === 'string') return value;
   return value._id || value.id || null;
+};
+
+const filterScopedGuests = (guestList, guestIds) => {
+  if (!Array.isArray(guestIds)) {
+    return guestList;
+  }
+
+  const allowedGuestIds = new Set(guestIds);
+  return guestList.filter((guest) => allowedGuestIds.has(guest._id));
 };
 
 export default function GuestsPage() {
@@ -25,27 +35,15 @@ export default function GuestsPage() {
     setError('');
 
     try {
-      const url = query
-        ? `${API_URL}/guests/search?query=${encodeURIComponent(query)}`
-        : `${API_URL}/guests`;
-
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error('Error fetching guests');
-      }
-
-      const data = await res.json();
+      const data = await listGuests(query);
       const safeData = data || [];
 
-      if (!propertyId || !Array.isArray(overrideGuestIds)) {
-        setGuests(safeData);
-        return;
-      }
-
-      const allowedGuestIds = new Set(overrideGuestIds);
-      setGuests(safeData.filter((guest) => allowedGuestIds.has(guest._id)));
-    } catch (err) {
+      setGuests(
+        !propertyId || !Array.isArray(overrideGuestIds)
+          ? safeData
+          : filterScopedGuests(safeData, overrideGuestIds)
+      );
+    } catch {
       setError('Could not load guests');
     } finally {
       setLoading(false);
@@ -56,23 +54,26 @@ export default function GuestsPage() {
     const loadScope = async () => {
       if (!propertyId) {
         setScopedGuestIds(null);
-        fetchGuests('', null);
+        setLoading(true);
+        setError('');
+
+        try {
+          const guestData = await listGuests('');
+          setGuests(guestData || []);
+        } catch {
+          setGuests([]);
+          setError('Could not load guests');
+        } finally {
+          setLoading(false);
+        }
+
         return;
       }
 
       try {
-        const [roomsRes, bookingsRes] = await Promise.all([
-          fetch(`${API_URL}/properties/${propertyId}/rooms`),
-          fetch(`${API_URL}/bookings`)
-        ]);
-
-        if (!roomsRes.ok || !bookingsRes.ok) {
-          throw new Error('Error building guest scope');
-        }
-
         const [roomsData, bookingsData] = await Promise.all([
-          roomsRes.json(),
-          bookingsRes.json()
+          listPropertyRooms(propertyId),
+          listBookings()
         ]);
 
         const roomIds = new Set((roomsData || []).map((room) => room._id));
@@ -85,8 +86,9 @@ export default function GuestsPage() {
           .filter(Boolean);
 
         setScopedGuestIds(guestIds);
-        fetchGuests('', guestIds);
-      } catch (err) {
+        const guestData = await listGuests('');
+        setGuests(filterScopedGuests(guestData || [], guestIds));
+      } catch {
         setScopedGuestIds([]);
         setGuests([]);
         setError('Could not load guests');

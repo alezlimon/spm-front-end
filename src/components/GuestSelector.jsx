@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import { listGuests } from '../api/guestsApi';
 
 export default function GuestSelector({ value, onChange }) {
   const [guests, setGuests] = useState([]);
@@ -10,14 +9,15 @@ export default function GuestSelector({ value, onChange }) {
   useEffect(() => {
     const fetchGuests = async () => {
       setLoading(true);
-      const url = search
-        ? `${API_URL}/guests/search?query=${encodeURIComponent(search)}`
-        : `${API_URL}/guests`;
-      const res = await fetch(url);
-      const data = await res.json();
-      setGuests(data);
-      setLoading(false);
+
+      try {
+        const data = await listGuests(search);
+        setGuests(data || []);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchGuests();
   }, [search]);
 

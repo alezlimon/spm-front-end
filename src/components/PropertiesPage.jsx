@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { listProperties } from '../api/propertiesApi';
 import '../App.css';
 
 import alpineHouseImage from '../assets/properties/Property Images/Alpine House.png';
@@ -20,8 +21,6 @@ const propertyImageMap = {
   'Villa Solene': villaSoleneImage
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
-
 export default function PropertiesPage() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
@@ -34,15 +33,9 @@ export default function PropertiesPage() {
       setError('');
 
       try {
-        const res = await fetch(`${API_URL}/properties`);
-
-        if (!res.ok) {
-          throw new Error('Error fetching properties');
-        }
-
-        const data = await res.json();
+        const data = await listProperties();
         setProperties(data || []);
-      } catch (err) {
+      } catch {
         setError('Could not load properties');
       } finally {
         setLoading(false);

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+import { getProperty } from '../api/propertiesApi';
 
 const subNavStyle = {
   background: '#0D0E10',
@@ -88,15 +87,9 @@ export default function PropertyLayout() {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const res = await fetch(`${API_URL}/properties/${propertyId}`);
-
-        if (!res.ok) {
-          return;
-        }
-
-        const data = await res.json();
-        setProperty(data?.property || data || null);
-      } catch (err) {
+        const data = await getProperty(propertyId);
+        setProperty(data);
+      } catch {
         setProperty(null);
       }
     };

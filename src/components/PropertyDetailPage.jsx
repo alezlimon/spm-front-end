@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { getProperty, listProperties, listPropertyRooms } from '../api/propertiesApi';
 import '../App.css';
 
 import alpineHouseImage from '../assets/properties/Property Images/Alpine House.png';
@@ -9,8 +10,6 @@ import riadNoirImage from '../assets/properties/Property Images/Riad Noir.png';
 import villaAzureImage from '../assets/properties/Property Images/Villa Azure.png';
 import villaMiradorImage from '../assets/properties/Property Images/Villa Mirador.png';
 import villaSoleneImage from '../assets/properties/Property Images/Villa Solene.png';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 const propertyImageMap = {
   'Alpine House': alpineHouseImage,
@@ -38,22 +37,16 @@ export default function PropertyDetailPage() {
       setError('');
 
       try {
-        const [propertyRes, propertiesRes] = await Promise.all([
-          fetch(`${API_URL}/properties/${propertyId}`),
-          fetch(`${API_URL}/properties`)
+        const [propertyData, roomsData, propertiesData] = await Promise.all([
+          getProperty(propertyId),
+          listPropertyRooms(propertyId),
+          listProperties()
         ]);
 
-        if (!propertyRes.ok || !propertiesRes.ok) {
-          throw new Error('Error fetching property details');
-        }
-
-        const propertyData = await propertyRes.json();
-        const propertiesData = await propertiesRes.json();
-
-        setProperty(propertyData.property);
-        setRooms(propertyData.rooms || []);
+        setProperty(propertyData);
+        setRooms(roomsData || []);
         setAllProperties(propertiesData || []);
-      } catch (err) {
+      } catch {
         setError('Could not load property details');
       } finally {
         setLoading(false);

@@ -1,8 +1,6 @@
 import { useState } from 'react';
+import { createGuest } from '../api/guestsApi';
 import '../App.css';
-import { getAuthHeaders } from '../utils/auth';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 function NewGuestForm({ onGuestCreated }) {
   const [form, setForm] = useState({
@@ -51,24 +49,7 @@ function NewGuestForm({ onGuestCreated }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/guests`, {
-        method: 'POST',
-        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(form)
-      });
-
-      if (!res.ok) {
-        let msg = 'Could not create guest';
-
-        try {
-          const data = await res.json();
-          if (data && data.message) msg = data.message;
-        } catch {
-          // ignore JSON parsing error
-        }
-
-        throw new Error(msg);
-      }
+      await createGuest(form);
 
       setSuccess(true);
       setForm({

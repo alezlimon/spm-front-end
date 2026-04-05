@@ -1,11 +1,9 @@
-import { useState } from 'react';
-
 export default function BirthDateInput({ value, onChange }) {
   return (
     <input
       name="birthDate"
       type="date"
-      placeholder="Fecha de nacimiento"
+      placeholder="Birth date"
       value={value}
       onChange={onChange}
       required
