@@ -100,6 +100,19 @@ Use one label per checkpoint:
 - `Pending contract`: endpoint/contract behavior not frozen yet.
 - `Blocked by missing endpoint`: cannot validate because backend capability is not available.
 
+## Latest validation snapshot (2026-04-05)
+
+Source: backend confirmation + FE readiness review.
+
+- Checkpoint 1 (query mode and request shape): `Pass` (mode lock `range` confirmed).
+- Checkpoint 2 (bookings filters/pagination behavior): `Pending contract` (backend list filter/pagination contract not frozen yet).
+- Checkpoint 3 (property-scoped bookings behavior): `Pending contract` (depends on final filtered-list backend contract).
+- Checkpoint 4 (legacy translation fallback check): `Pass` for covered DoD endpoints.
+
+Pending to close fully:
+
+- Run joint staging session and replace this snapshot with observed runtime evidence (network/log capture).
+
 ## Exit criteria
 
 All checks above are `yes` and no blocking issue remains for FE operation flows.
