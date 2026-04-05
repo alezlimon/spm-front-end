@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking, getBookingById } from '../api/bookingsApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { formatDisplayDate } from '../utils/date';
+import { formatCurrency } from '../utils/money';
 import AssignGuestToBooking from './AssignGuestToBooking';
 import { ErrorState, LoadingState } from './PageState';
 
@@ -154,7 +155,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
             {typeof booking.totalPrice === 'number' && (
               <div className="modal-pricing-row">
                 <span>Total price</span>
-                <strong>€{booking.totalPrice}</strong>
+                <strong>{formatCurrency(booking.totalPrice)}</strong>
               </div>
             )}
           </div>

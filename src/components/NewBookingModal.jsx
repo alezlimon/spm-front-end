@@ -5,6 +5,7 @@ import { createGuest, listGuests } from '../api/guestsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
 import { toInputDate } from '../utils/date';
+import { formatCurrency } from '../utils/money';
 const BREAKFAST_PRICE = 15;
 
 const calcNights = (checkIn, checkOut) => {
@@ -273,8 +274,8 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                     >
                       <span className="modal-room-number">Room {room.roomNumber}</span>
                       <span className="modal-room-type">{room.type}</span>
-                      <span className="modal-room-price">€{room.pricePerNight} / night</span>
-                      <span className="modal-room-total">€{room.pricePerNight * nights} total</span>
+                      <span className="modal-room-price">{formatCurrency(room.pricePerNight)} / night</span>
+                      <span className="modal-room-total">{formatCurrency(room.pricePerNight * nights)} total</span>
                     </button>
                   ))}
                 </div>
@@ -289,11 +290,11 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
             <div className="modal-pricing-summary">
               <div className="modal-pricing-row">
                 <span>Room {selectedRoom.roomNumber} — {selectedRoom.type}</span>
-                <span>€{selectedRoom.pricePerNight} × {nights} night{nights !== 1 ? 's' : ''}</span>
+                <span>{formatCurrency(selectedRoom.pricePerNight)} × {nights} night{nights !== 1 ? 's' : ''}</span>
               </div>
               <div className="modal-pricing-row">
                 <span>Base price</span>
-                <strong>€{basePrice}</strong>
+                <strong>{formatCurrency(basePrice)}</strong>
               </div>
             </div>
 
@@ -305,7 +306,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
               <span className="modal-breakfast-icon">☕</span>
               <span className="modal-breakfast-label">
                 <strong>Include breakfast</strong>
-                <small>€{BREAKFAST_PRICE} per night</small>
+                <small>{formatCurrency(BREAKFAST_PRICE)} per night</small>
               </span>
               <span className={`modal-breakfast-check${breakfast ? ' modal-breakfast-check-on' : ''}`}>
                 {breakfast ? '✓' : '+'}
@@ -314,14 +315,14 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
             {breakfast && (
               <div className="modal-pricing-row modal-pricing-breakfast">
-                <span>Breakfast (€{BREAKFAST_PRICE} × {nights} night{nights !== 1 ? 's' : ''})</span>
-                <span>+€{breakfastCost}</span>
+                <span>Breakfast ({formatCurrency(BREAKFAST_PRICE)} × {nights} night{nights !== 1 ? 's' : ''})</span>
+                <span>+{formatCurrency(breakfastCost)}</span>
               </div>
             )}
 
             <div className="modal-total-row">
               <span>Total</span>
-              <strong>€{total}</strong>
+              <strong>{formatCurrency(total)}</strong>
             </div>
           </div>
         )}

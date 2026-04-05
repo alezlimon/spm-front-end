@@ -126,5 +126,6 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 ## 11) Billing readiness (futuro)
 
 - [x] Documento de preparacion creado: `docs/BILLING-READINESS-NOTE.md`.
+- [x] Formateo monetario centralizado en FE (`src/utils/money.js`) para evitar calculos/presentacion ad-hoc.
 - [ ] Congelar contrato backend de currency/rounding y snapshot de pricing.
 - [ ] Definir enum y transiciones de estado de pago.

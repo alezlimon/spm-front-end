@@ -1,3 +1,5 @@
+import { formatCurrency } from '../utils/money';
+
 function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
   let actionButton = null;
 
@@ -54,7 +56,7 @@ function RoomCard({ room, getStatusClass, updateRoomStatus, currentBooking }) {
       <div className="room-card-details">
         <div className="room-detail-item">
           <span>Rate</span>
-          <strong>€{room.pricePerNight}</strong>
+          <strong>{formatCurrency(room.pricePerNight)}</strong>
         </div>
 
         <div className="room-detail-item">
