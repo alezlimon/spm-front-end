@@ -276,19 +276,19 @@ export default function PropertiesPage() {
 
       {!loading && !error && properties.length > 0 && (
         <section className="properties-portfolio-kpis">
-          <div className="summary-card">
+          <div className="summary-card summary-card-static">
             <h3>Portfolio</h3>
             <p>{portfolioSummary.totalProperties}</p>
           </div>
-          <div className="summary-card">
+          <div className="summary-card summary-card-static">
             <h3>Arrivals Today</h3>
             <p>{portfolioSummary.arrivalsToday}</p>
           </div>
-          <div className="summary-card">
+          <div className="summary-card summary-card-static">
             <h3>Dirty Rooms</h3>
             <p>{portfolioSummary.dirtyRooms}</p>
           </div>
-          <div className="summary-card">
+          <div className="summary-card summary-card-static">
             <h3>Outstanding</h3>
             <p>{formatCurrency(portfolioSummary.outstandingAmount)}</p>
           </div>

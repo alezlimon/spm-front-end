@@ -151,6 +151,16 @@ a {
   transform: translateY(-2px);
 }
 
+.summary-card-static {
+  cursor: default;
+}
+
+.summary-card-static:hover {
+  border-color: rgba(255, 248, 240, 0.09);
+  background: linear-gradient(180deg, rgba(255, 252, 248, 0.05) 0%, rgba(255, 252, 248, 0.028) 100%);
+  transform: none;
+}
+
 .summary-card h3 {
   margin: 0 0 8px;
   font-size: 0.74rem;
