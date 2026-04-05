@@ -12,7 +12,7 @@ Objetivo: cerrar integracion FE-BE minimizando logica en frontend y centralizand
 ## 1) Bloqueantes Semana 1 (must-have)
 
 ### Auth
-- [ ] Confirmar ruta canonica unica para auth (`/auth/*` o `/api/auth/*`).
+- [x] Confirmar ruta canonica unica para auth (`/auth/*` o `/api/auth/*`).
 - [x] Mantener estable `POST /auth/login` y `GET /auth/verify`.
 - [x] Definir respuesta de error consistente en login/verify.
 
@@ -58,8 +58,8 @@ Objetivo: cerrar integracion FE-BE minimizando logica en frontend y centralizand
 
 ## 4) Formatos globales (backend owner)
 
-- [ ] Timezone oficial del sistema (ej: `Europe/Madrid` o `UTC`).
-- [ ] Moneda oficial (ej: `EUR`) y reglas de redondeo.
+- [ ] Timezone oficial del sistema (propuesta backend para sprint actual: `UTC`).
+- [ ] Moneda oficial (propuesta backend para sprint actual: `EUR`) y reglas de redondeo (propuesta: 2 decimales, half-up).
 - [ ] Formato de fechas de entrada/salida (ISO 8601 obligatorio).
 - [ ] Enums oficiales cerrados y documentados por modulo.
 
@@ -89,6 +89,8 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Backend compartio DoD de errores para endpoints prioritarios (2026-04-05).
 - [x] Backend confirmo y congelo contrato de booking detail para este sprint (`GET /api/bookings/:id` autenticado).
 - [x] Backend confirmo `MODE: range` para staging en query params de bookings.
+- [x] Backend confirmo prefijo canonico de auth: `/auth/*` (`/api/auth/*` queda legacy temporal hasta post-freeze).
+- [ ] Sign-off de filtros/paginacion de bookings pendiente: contrato backend aun no congelado.
 - [ ] Revalidar en staging para eliminar fallback de traduccion FE definitivamente (objetivo: 2026-04-12).
 - [x] Fallback de traduccion FE desactivado por defecto y solo habilitable por flag temporal.
 
@@ -118,4 +120,4 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 
 - [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12) usando `docs/STAGING-VALIDATION-RUNBOOK.md`.
 - [x] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
-- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range` y completar log de validacion en `docs/STAGING-VALIDATION-RUNBOOK.md`.
+- [ ] Ejecutar validacion conjunta en staging y marcar cada checkpoint como `Pass`, `Pending contract` o `Blocked by missing endpoint` en `docs/STAGING-VALIDATION-RUNBOOK.md`.

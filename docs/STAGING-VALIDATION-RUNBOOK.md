@@ -8,7 +8,7 @@ Goal: close the remaining FE pending items with a repeatable validation flow.
 This runbook validates:
 
 - Bookings query mode lock (`MODE: range`)
-- Bookings filters/pagination behavior in staging
+- Bookings filters/pagination behavior in staging (current status may remain pending contract)
 - Legacy error translation fallback can stay disabled (`VITE_ENABLE_LEGACY_ERROR_TRANSLATIONS=false`)
 
 ## Required env settings
@@ -21,9 +21,16 @@ Use these values in staging frontend deployment:
 
 ## Preconditions
 
-1. Backend staging is deployed with confirmed range query contract.
+1. Backend staging is deployed with confirmed `MODE: range`.
 2. Staging dataset includes bookings in multiple statuses and at least 2 pages of results.
 3. At least one property has associated rooms and bookings.
+
+Known backend status at this moment:
+
+- Auth canonical prefix: `/auth/*` (confirmed)
+- `/api/auth/*` remains temporary legacy mount (removal planned post-freeze)
+- Bookings filters/pagination full contract: pending freeze
+- Timezone/currency/rounding: proposed (`UTC`, `EUR`, 2 decimals half-up) but not yet frozen
 
 ## Validation steps
 
@@ -84,6 +91,14 @@ Copy/paste and fill:
 - Legacy translation fallback kept disabled: yes/no
 - Issues found:
 - Owner + ETA for fixes:
+
+## Checkpoint result labels
+
+Use one label per checkpoint:
+
+- `Pass`: validated end-to-end in staging.
+- `Pending contract`: endpoint/contract behavior not frozen yet.
+- `Blocked by missing endpoint`: cannot validate because backend capability is not available.
 
 ## Exit criteria
 
