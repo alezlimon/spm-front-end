@@ -6,8 +6,11 @@ import {
   setStoredToken
 } from '../utils/auth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
-const AUTH_URL = API_URL.replace(/\/api$/, '/auth');
+const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+const API_URL = /^https?:\/\//i.test(rawApiUrl) ? rawApiUrl : `https://${rawApiUrl}`;
+const AUTH_URL = API_URL
+  .replace(/\/+$/, '')
+  .replace(/\/api\/?$/i, '/auth');
 
 const AuthContext = createContext(null);
 
