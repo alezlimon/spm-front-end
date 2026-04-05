@@ -5,12 +5,17 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background-color: #0f1012;
+  background:
+    radial-gradient(circle at 12% 14%, rgba(212, 168, 93, 0.09), transparent 24%),
+    radial-gradient(circle at 84% 18%, rgba(112, 184, 228, 0.08), transparent 22%),
+    radial-gradient(circle at 70% 82%, rgba(116, 198, 157, 0.05), transparent 20%),
+    linear-gradient(180deg, #0f1012 0%, #0a0b0d 100%);
   color: #14171b;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
 }
 
 a {
@@ -20,30 +25,30 @@ a {
 
 .app {
   width: 100%;
-  max-width: 1320px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 28px 32px 44px;
+  padding: 32px 32px 52px;
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   text-align: left;
 }
 
 .header h1 {
   margin: 0 0 8px;
-  font-size: 2.1rem;
+  font-size: 2.3rem;
   line-height: 1.02;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.065em;
   font-weight: 600;
   color: #f5efe7;
 }
 
 .header p {
   margin: 0;
-  max-width: 680px;
-  font-size: 0.96rem;
-  line-height: 1.55;
+  max-width: 760px;
+  font-size: 0.98rem;
+  line-height: 1.6;
   color: #a89d92;
 }
 
@@ -53,8 +58,9 @@ a {
   gap: 8px;
   padding: 4px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 248, 240, 0.1);
-  background: rgba(255, 252, 248, 0.03);
+  border: 1px solid rgba(255, 248, 240, 0.12);
+  background: rgba(255, 252, 248, 0.045);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .rooms-view-toggle button {
@@ -67,6 +73,7 @@ a {
   letter-spacing: 0.03em;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .rooms-view-toggle button.active {
@@ -127,21 +134,21 @@ a {
 }
 
 .summary-card {
-  background: rgba(255, 252, 248, 0.035);
-  border: 1px solid rgba(255, 248, 240, 0.08);
+  background: linear-gradient(180deg, rgba(255, 252, 248, 0.05) 0%, rgba(255, 252, 248, 0.028) 100%);
+  border: 1px solid rgba(255, 248, 240, 0.09);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.16);
   cursor: pointer;
   transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
   text-align: left;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
 }
 
 .summary-card:hover {
-  border-color: rgba(255, 248, 240, 0.16);
-  background-color: rgba(255, 252, 248, 0.05);
-  transform: translateY(-1px);
+  border-color: rgba(255, 248, 240, 0.18);
+  background-color: rgba(255, 252, 248, 0.06);
+  transform: translateY(-2px);
 }
 
 .summary-card h3 {
@@ -215,21 +222,21 @@ a {
 .search-bar input {
   width: 100%;
   max-width: 100%;
-  padding: 11px 13px;
+  padding: 12px 14px;
   border: 1px solid rgba(255, 248, 240, 0.12);
   border-radius: 14px;
-  background: rgba(255, 252, 248, 0.04);
+  background: rgba(255, 252, 248, 0.045);
   color: #f7f2eb;
   font-size: 0.89rem;
   line-height: 1.4;
   outline: none;
-  transition: border-color 0.18s ease, background-color 0.18s ease;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .search-bar input:focus {
-  border-color: rgba(255, 248, 240, 0.24);
+  border-color: rgba(212, 168, 93, 0.32);
   background-color: rgba(255, 252, 248, 0.06);
-  box-shadow: none;
+  box-shadow: 0 0 0 4px rgba(212, 168, 93, 0.08);
 }
 
 .search-bar input::placeholder {
@@ -1451,23 +1458,24 @@ a {
   border-radius: 12px;
   font-size: 0.84rem;
   line-height: 1.2;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .primary-button {
   border: 1px solid rgba(255, 248, 240, 0.12);
-  background: linear-gradient(180deg, #211c19 0%, #171311 100%);
+  background: linear-gradient(180deg, #261f1a 0%, #171311 100%);
   color: #fffaf3;
   width: fit-content;
   min-width: 130px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.24);
 }
 
 .primary-button:hover {
-  border-color: rgba(255, 248, 240, 0.2);
-  transform: translateY(-1px);
+  border-color: rgba(212, 168, 93, 0.28);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.28);
+  transform: translateY(-2px);
 }
 
 .primary-button:disabled {
@@ -1477,13 +1485,23 @@ a {
 
 .secondary-button {
   border: 1px solid rgba(255, 248, 240, 0.12);
-  background: transparent;
+  background: rgba(255, 251, 247, 0.02);
   color: #f8f2ea;
 }
 
 .secondary-button:hover {
-  background: rgba(255, 251, 247, 0.05);
-  border-color: rgba(255, 248, 240, 0.18);
+  background: rgba(255, 251, 247, 0.06);
+  border-color: rgba(255, 248, 240, 0.2);
+}
+
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.filter-bar button:focus-visible,
+.rooms-filter-pill:focus-visible,
+.rooms-view-toggle button:focus-visible,
+.search-bar input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(212, 168, 93, 0.08);
 }
 
 /* PROPERTIES PAGE */

@@ -2,18 +2,20 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 
 const navStyle = {
-  background: '#050608',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+  background: 'rgba(5, 6, 8, 0.82)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+  backdropFilter: 'blur(14px)',
   position: 'sticky',
   top: 0,
-  zIndex: 100
+  zIndex: 100,
+  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)'
 };
 
 const navInnerStyle = {
-  maxWidth: '1180px',
+  maxWidth: '1360px',
   margin: '0 auto',
-  padding: '0 24px',
-  minHeight: '68px',
+  padding: '0 32px',
+  minHeight: '72px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -24,20 +26,22 @@ const brandStyle = {
   color: '#F5F7FA',
   textDecoration: 'none',
   fontWeight: 600,
-  fontSize: '1.05rem',
-  letterSpacing: '-0.04em'
+  fontSize: '1.08rem',
+  letterSpacing: '-0.05em'
 };
 
 const logoutStyle = {
-  color: 'rgba(245, 247, 250, 0.72)',
+  color: 'rgba(245, 247, 250, 0.82)',
   textDecoration: 'none',
   fontWeight: 500,
   fontSize: '0.88rem',
   letterSpacing: '0.01em',
   transition: 'color 0.18s ease',
-  background: 'transparent',
-  border: 'none',
-  cursor: 'pointer'
+  background: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid rgba(255, 255, 255, 0.07)',
+  cursor: 'pointer',
+  borderRadius: '999px',
+  padding: '8px 12px'
 };
 
 export default function Navbar() {

@@ -3,18 +3,20 @@ import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
 import { getProperty } from '../api/propertiesApi';
 
 const subNavStyle = {
-  background: '#0D0E10',
+  background: 'rgba(13, 14, 16, 0.82)',
   borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+  backdropFilter: 'blur(14px)',
   position: 'sticky',
-  top: '68px',
-  zIndex: 90
+  top: '72px',
+  zIndex: 90,
+  boxShadow: '0 10px 24px rgba(0, 0, 0, 0.12)'
 };
 
 const subNavInnerStyle = {
-  maxWidth: '1180px',
+  maxWidth: '1360px',
   margin: '0 auto',
-  padding: '0 24px',
-  minHeight: '52px',
+  padding: '0 32px',
+  minHeight: '58px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -28,7 +30,7 @@ const propertyNameStyle = {
 };
 
 const backLinkStyle = {
-  color: 'rgba(245, 247, 250, 0.44)',
+  color: 'rgba(245, 247, 250, 0.52)',
   textDecoration: 'none',
   fontSize: '0.83rem',
   fontWeight: 500,
@@ -40,14 +42,14 @@ const backLinkStyle = {
 };
 
 const separatorStyle = {
-  color: 'rgba(255, 255, 255, 0.15)',
+  color: 'rgba(255, 255, 255, 0.18)',
   fontSize: '0.85rem'
 };
 
 const titleStyle = {
   color: '#F5F7FA',
   fontWeight: 600,
-  fontSize: '0.93rem',
+  fontSize: '0.95rem',
   letterSpacing: '-0.02em',
   textDecoration: 'none',
   display: 'inline-flex',
@@ -56,16 +58,24 @@ const titleStyle = {
 };
 
 const typeStyle = {
-  color: 'rgba(245, 247, 250, 0.38)',
-  fontSize: '0.78rem',
+  color: 'rgba(245, 247, 250, 0.58)',
+  fontSize: '0.74rem',
   fontWeight: 500,
-  marginLeft: '8px'
+  marginLeft: '8px',
+  padding: '3px 7px',
+  borderRadius: '999px',
+  border: '1px solid rgba(255,255,255,0.07)',
+  background: 'rgba(255,255,255,0.03)'
 };
 
 const tabsStyle = {
   display: 'flex',
   alignItems: 'center',
-  gap: '2px'
+  gap: '4px',
+  padding: '3px',
+  borderRadius: '999px',
+  background: 'rgba(255,255,255,0.025)',
+  border: '1px solid rgba(255,255,255,0.05)'
 };
 
 const billingTabStyle = ({ isActive }) => ({
@@ -79,9 +89,10 @@ const getTabStyle = ({ isActive }) => ({
   fontWeight: isActive ? 600 : 500,
   fontSize: '0.88rem',
   letterSpacing: '0.01em',
-  padding: '5px 12px',
-  borderRadius: '6px',
+  padding: '7px 12px',
+  borderRadius: '999px',
   background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+  border: isActive ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
   transition: 'all 0.18s ease'
 });
 
