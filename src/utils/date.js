@@ -1,3 +1,12 @@
+export const DISPLAY_TIME_ZONE = 'UTC';
+
+const DISPLAY_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  timeZone: DISPLAY_TIME_ZONE,
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit'
+});
+
 export const toInputDate = (dateValue = new Date()) => {
   const date = new Date(dateValue);
 
@@ -23,5 +32,5 @@ export const formatDisplayDate = (dateValue, fallback = '—') => {
     return fallback;
   }
 
-  return date.toLocaleDateString();
+  return DISPLAY_DATE_FORMATTER.format(date);
 };

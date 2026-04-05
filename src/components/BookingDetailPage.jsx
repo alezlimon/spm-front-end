@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { checkInBooking, checkOutBooking, getBookingById } from '../api/bookingsApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { formatDisplayDate } from '../utils/date';
+import { resolveBookingPricing } from '../utils/bookingPricing';
 import { formatCurrency } from '../utils/money';
 import AssignGuestToBooking from './AssignGuestToBooking';
 import { ErrorState, LoadingState } from './PageState';
@@ -112,6 +113,8 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
     });
   };
 
+  const pricing = resolveBookingPricing(booking);
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-panel" onClick={(event) => event.stopPropagation()}>
@@ -152,10 +155,28 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
               <span>Status</span>
               <strong>{booking.status || 'Unknown'}</strong>
             </div>
-            {typeof booking.totalPrice === 'number' && (
+            {pricing.hasSnapshot && typeof pricing.base === 'number' && (
+              <div className="modal-pricing-row">
+                <span>Base</span>
+                <strong>{formatCurrency(pricing.base, { currency: pricing.currency })}</strong>
+              </div>
+            )}
+            {pricing.hasSnapshot && typeof pricing.taxes === 'number' && (
+              <div className="modal-pricing-row">
+                <span>Taxes</span>
+                <strong>{formatCurrency(pricing.taxes, { currency: pricing.currency })}</strong>
+              </div>
+            )}
+            {pricing.hasSnapshot && typeof pricing.discounts === 'number' && (
+              <div className="modal-pricing-row">
+                <span>Discounts</span>
+                <strong>-{formatCurrency(Math.abs(pricing.discounts), { currency: pricing.currency })}</strong>
+              </div>
+            )}
+            {typeof pricing.total === 'number' && (
               <div className="modal-pricing-row">
                 <span>Total price</span>
-                <strong>{formatCurrency(booking.totalPrice)}</strong>
+                <strong>{formatCurrency(pricing.total, { currency: pricing.currency })}</strong>
               </div>
             )}
           </div>

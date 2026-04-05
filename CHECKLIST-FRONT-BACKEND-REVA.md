@@ -127,5 +127,7 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 
 - [x] Documento de preparacion creado: `docs/BILLING-READINESS-NOTE.md`.
 - [x] Formateo monetario centralizado en FE (`src/utils/money.js`) para evitar calculos/presentacion ad-hoc.
+- [x] Reglas de display bloqueadas en FE segun confirmacion backend: `UTC` + `EUR` + rounding half-up (2 decimales).
+- [x] Consumo de snapshot pricing en booking detail preparado detras de feature switch (`VITE_ENABLE_BOOKING_PRICING_SNAPSHOT=false` por defecto).
 - [ ] Congelar contrato backend de currency/rounding y snapshot de pricing.
 - [ ] Definir enum y transiciones de estado de pago.
