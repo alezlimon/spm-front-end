@@ -1,15 +1,26 @@
 import { useState } from 'react';
 
 export default function EditGuestForm({ guest, onSave, onCancel }) {
+  const normalizeBirthDate = (value) => {
+    if (!value) return '';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '';
+    return parsed.toISOString().slice(0, 10);
+  };
+
   const [form, setForm] = useState({
     firstName: guest.firstName || '',
     lastName: guest.lastName || '',
     email: guest.email || '',
     document: guest.document || '',
-    birthDate: guest.birthDate || ''
+    birthDate: normalizeBirthDate(guest.birthDate)
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,32 +29,89 @@ export default function EditGuestForm({ guest, onSave, onCancel }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    if (
+      !form.firstName.trim() ||
+      !form.lastName.trim() ||
+      !form.email.trim() ||
+      !form.document.trim() ||
+      !form.birthDate
+    ) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (!isValidEmail(form.email)) {
+      setError('Invalid email format');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       await onSave(form);
-    } catch {
-      setError('Could not save guest');
+    } catch (err) {
+      setError(err.message || 'Could not save guest');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{background:'#fff',borderRadius:12,padding:16,marginBottom:16}}>
-      <h3 style={{margin:'0 0 8px'}}>Edit guest</h3>
-      <input name="firstName" placeholder="First name" value={form.firstName} onChange={handleChange} required style={{padding:8,marginBottom:8,width:'100%'}} />
-      <input name="lastName" placeholder="Last name" value={form.lastName} onChange={handleChange} required style={{padding:8,marginBottom:8,width:'100%'}} />
-      <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required style={{padding:8,marginBottom:8,width:'100%'}} />
-      <input name="document" placeholder="Passport / ID" value={form.document} onChange={handleChange} required style={{padding:8,marginBottom:8,width:'100%'}} />
-      <input name="birthDate" type="date" placeholder="Birth date" value={form.birthDate} onChange={handleChange} required style={{padding:8,marginBottom:8,width:'100%'}} />
-      <div style={{display:'flex',gap:8}}>
-        <button type="submit" disabled={loading} style={{background:'#059669',color:'#fff',border:'none',borderRadius:8,padding:8,fontWeight:600}}>
+    <form className="guest-edit-form" onSubmit={handleSubmit}>
+      <h3 className="guest-edit-form-title">Edit Guest</h3>
+
+      <div className="guest-form-grid">
+        <input
+          name="firstName"
+          placeholder="First name"
+          value={form.firstName}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="lastName"
+          placeholder="Last name"
+          value={form.lastName}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="document"
+          placeholder="Passport / ID"
+          value={form.document}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="birthDate"
+          type="date"
+          value={form.birthDate}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="guest-edit-form-actions">
+        <button className="primary-button" type="submit" disabled={loading}>
           {loading ? 'Saving...' : 'Save'}
         </button>
-        <button type="button" onClick={onCancel} style={{background:'#d1d5db',color:'#111',border:'none',borderRadius:8,padding:8}}>Cancel</button>
+
+        <button className="secondary-button" type="button" onClick={onCancel}>
+          Cancel
+        </button>
       </div>
-      {error && <p style={{color:'#b91c1c',margin:0}}>{error}</p>}
+
+      {error && <p className="form-feedback form-feedback-error">{error}</p>}
     </form>
   );
 }

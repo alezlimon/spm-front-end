@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { listAllBookings } from '../api/bookingsApi';
 import { listGuests } from '../api/guestsApi';
@@ -30,6 +30,7 @@ export default function GuestsPage() {
   const [scopedGuestIds, setScopedGuestIds] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const searchDebounceRef = useRef(null);
 
   const fetchGuests = async (query = '', overrideGuestIds = scopedGuestIds) => {
     setLoading(true);
@@ -102,8 +103,23 @@ export default function GuestsPage() {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearch(value);
-    fetchGuests(value);
+
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    searchDebounceRef.current = setTimeout(() => {
+      fetchGuests(value);
+    }, 300);
   };
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   const handleGuestCreated = () => {
     fetchGuests(search);

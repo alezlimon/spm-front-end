@@ -1892,6 +1892,31 @@ a {
   color: #a89d92;
 }
 
+.guest-edit-form {
+  display: grid;
+  gap: 12px;
+}
+
+.guest-edit-form-title {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  color: #f7f2eb;
+}
+
+.guest-edit-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.guest-edit-form-actions .primary-button,
+.guest-edit-form-actions .secondary-button {
+  min-width: 90px;
+}
+
 .bookings-table-wrapper {
   background: rgba(255, 252, 248, 0.035);
   border: 1px solid rgba(255, 248, 240, 0.08);
