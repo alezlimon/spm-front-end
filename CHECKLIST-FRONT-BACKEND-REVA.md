@@ -99,9 +99,14 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Acciones operativas en booking detail: check-in, check-out, assign guest.
 - [x] Refresco automatico del detalle despues de mutaciones.
 - [x] Quick actions de check-in/check-out en bookings table con guardas por estado.
+- [x] Feedback por fila con auto-limpieza en operaciones de bookings table y room history.
+- [x] Estados de carga por fila para evitar bloqueos globales en acciones operativas.
+- [x] Flujo de booking detail con acciones operativas unificadas y mensajes consistentes.
 
 ## 10) Siguiente bloque FE (sin bloqueo)
 
-- [ ] Robustecer feedback en quick actions (success/error por fila en tabla).
-- [ ] Homogeneizar estilos de botones operativos en bookings y room history.
+- [x] Robustecer feedback en quick actions (success/error por fila en tabla).
+- [x] Homogeneizar estilos de botones operativos en bookings y room history.
 - [ ] Remover fallback de traduccion FE tras validacion de staging (2026-04-12).
+- [ ] Incorporar filtros/paginacion server-side de bookings cuando backend exponga contrato.
+- [ ] Añadir vista compacta de errores operativos para soporte (referencia + ultimo fallo).

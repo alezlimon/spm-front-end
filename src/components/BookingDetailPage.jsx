@@ -31,7 +31,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingError, setLoadingError] = useState('');
-  const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoadingType, setActionLoadingType] = useState('');
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
 
@@ -67,46 +67,48 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
     loadBooking({ showLoader: true });
   }, [loadBooking]);
 
-  const handleCheckIn = async () => {
+  const runBookingAction = async ({
+    actionType,
+    action,
+    successMessage,
+    fallbackMessage
+  }) => {
     if (!booking?._id) {
       return;
     }
 
-    setActionLoading(true);
+    setActionLoadingType(actionType);
     setActionError('');
     setActionSuccess('');
 
     try {
-      await checkInBooking(booking._id);
+      await action(booking._id);
       await loadBooking();
       onUpdated?.();
-      setActionSuccess('Booking checked in successfully.');
+      setActionSuccess(successMessage);
     } catch (error) {
-      setActionError(error.message || 'Could not check in booking');
+      setActionError(error.message || fallbackMessage);
     } finally {
-      setActionLoading(false);
+      setActionLoadingType('');
     }
   };
 
+  const handleCheckIn = async () => {
+    await runBookingAction({
+      actionType: 'check-in',
+      action: checkInBooking,
+      successMessage: 'Booking checked in successfully.',
+      fallbackMessage: 'Could not check in booking'
+    });
+  };
+
   const handleCheckOut = async () => {
-    if (!booking?._id) {
-      return;
-    }
-
-    setActionLoading(true);
-    setActionError('');
-    setActionSuccess('');
-
-    try {
-      await checkOutBooking(booking._id);
-      await loadBooking();
-      onUpdated?.();
-      setActionSuccess('Booking checked out successfully.');
-    } catch (error) {
-      setActionError(error.message || 'Could not check out booking');
-    } finally {
-      setActionLoading(false);
-    }
+    await runBookingAction({
+      actionType: 'check-out',
+      action: checkOutBooking,
+      successMessage: 'Booking checked out successfully.',
+      fallbackMessage: 'Could not check out booking'
+    });
   };
 
   return (
@@ -161,18 +163,18 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
             <button
               type="button"
               className="primary-button"
-              disabled={actionLoading || !canCheckIn(booking.status)}
+              disabled={Boolean(actionLoadingType) || !canCheckIn(booking.status)}
               onClick={handleCheckIn}
             >
-              {actionLoading ? 'Processing...' : 'Check in'}
+              {actionLoadingType === 'check-in' ? 'Processing...' : 'Check in'}
             </button>
             <button
               type="button"
               className="secondary-button"
-              disabled={actionLoading || !canCheckOut(booking.status)}
+              disabled={Boolean(actionLoadingType) || !canCheckOut(booking.status)}
               onClick={handleCheckOut}
             >
-              Check out
+              {actionLoadingType === 'check-out' ? 'Processing...' : 'Check out'}
             </button>
           </div>
 

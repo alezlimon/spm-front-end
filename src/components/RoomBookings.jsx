@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { checkInBooking, checkOutBooking } from '../api/bookingsApi';
 import { canCheckIn, canCheckOut } from '../utils/bookingStatus';
 import { listRoomBookings } from '../api/roomsApi';
@@ -9,16 +9,27 @@ export default function RoomBookings({ roomId }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [actionLoadingById, setActionLoadingById] = useState({});
   const [actionFeedbackById, setActionFeedbackById] = useState({});
+  const [recentActionErrors, setRecentActionErrors] = useState([]);
+  const feedbackTimeoutsRef = useRef({});
 
   const setRowFeedback = (bookingId, feedback) => {
+    if (feedbackTimeoutsRef.current[bookingId]) {
+      clearTimeout(feedbackTimeoutsRef.current[bookingId]);
+      delete feedbackTimeoutsRef.current[bookingId];
+    }
+
     setActionFeedbackById((prev) => ({
       ...prev,
       [bookingId]: feedback
     }));
 
-    setTimeout(() => {
+    if (!feedback) {
+      return;
+    }
+
+    feedbackTimeoutsRef.current[bookingId] = setTimeout(() => {
       setActionFeedbackById((prev) => {
         if (!prev[bookingId]) {
           return prev;
@@ -28,7 +39,27 @@ export default function RoomBookings({ roomId }) {
         delete next[bookingId];
         return next;
       });
+      delete feedbackTimeoutsRef.current[bookingId];
     }, 3500);
+  };
+
+  const setRowActionLoading = (bookingId, isLoading) => {
+    setActionLoadingById((prev) => {
+      if (isLoading) {
+        return {
+          ...prev,
+          [bookingId]: true
+        };
+      }
+
+      if (!prev[bookingId]) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[bookingId];
+      return next;
+    });
   };
 
   const refreshBookings = useCallback(async () => {
@@ -55,6 +86,43 @@ export default function RoomBookings({ roomId }) {
     loadBookings();
   }, [roomId, refreshBookings]);
 
+  useEffect(() => {
+    return () => {
+      const activeTimeouts = Object.values(feedbackTimeoutsRef.current);
+      activeTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+      feedbackTimeoutsRef.current = {};
+    };
+  }, []);
+
+  const handleBookingAction = async (bookingId, bookingAction, successMessage, fallbackMessage) => {
+    setRowActionLoading(bookingId, true);
+    setRowFeedback(bookingId, null);
+
+    try {
+      await bookingAction(bookingId);
+      await refreshBookings();
+      setRowFeedback(bookingId, { type: 'success', message: successMessage });
+    } catch (err) {
+      const errorMessage = err.message || fallbackMessage;
+
+      setRowFeedback(bookingId, {
+        type: 'error',
+        message: errorMessage
+      });
+
+      setRecentActionErrors((prev) => [
+        {
+          key: `${bookingId}-${Date.now()}`,
+          bookingId,
+          message: errorMessage
+        },
+        ...prev
+      ].slice(0, 4));
+    } finally {
+      setRowActionLoading(bookingId, false);
+    }
+  };
+
   if (!roomId) return null;
 
   return (
@@ -65,6 +133,31 @@ export default function RoomBookings({ roomId }) {
       {!loading && !error && bookings.length === 0 && (
         <EmptyState message="No bookings found for this room." />
       )}
+
+      {recentActionErrors.length > 0 && (
+        <div className="ops-errors-card" role="status" aria-live="polite" style={{ marginBottom: '10px' }}>
+          <div className="ops-errors-card-header">
+            <strong>Recent operation errors</strong>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setRecentActionErrors([])}
+            >
+              Clear
+            </button>
+          </div>
+
+          <ul className="ops-errors-list">
+            {recentActionErrors.map((errorItem) => (
+              <li key={errorItem.key}>
+                <span className="ops-errors-ref">#{errorItem.bookingId.slice(-6).toUpperCase()}</span>
+                <span>{errorItem.message}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <ul style={{listStyle:'none',padding:0}}>
         {bookings.map(b => (
           <li key={b._id} style={{background:'#f3f4f6',borderRadius:6,padding:10,marginBottom:8}}>
@@ -76,48 +169,26 @@ export default function RoomBookings({ roomId }) {
               {canCheckIn(b.status) && (
                 <button
                   className="primary-button room-bookings-action-btn"
-                  disabled={actionLoadingId === b._id}
-                  onClick={async () => {
-                    setActionLoadingId(b._id);
-                    setRowFeedback(b._id, null);
-
-                    try {
-                      await checkInBooking(b._id);
-                      await refreshBookings();
-                      setRowFeedback(b._id, { type: 'success', message: 'Checked in successfully.' });
-                    } catch (err) {
-                      setRowFeedback(b._id, {
-                        type: 'error',
-                        message: err.message || 'Could not check in booking'
-                      });
-                    } finally {
-                      setActionLoadingId(null);
-                    }
-                  }}
-                >{actionLoadingId === b._id ? '...' : 'Check in'}</button>
+                  disabled={Boolean(actionLoadingById[b._id])}
+                  onClick={() => handleBookingAction(
+                    b._id,
+                    checkInBooking,
+                    'Checked in successfully.',
+                    'Could not check in booking'
+                  )}
+                >{actionLoadingById[b._id] ? '...' : 'Check in'}</button>
               )}
               {canCheckOut(b.status) && (
                 <button
                   className="primary-button room-bookings-action-btn"
-                  disabled={actionLoadingId === b._id}
-                  onClick={async () => {
-                    setActionLoadingId(b._id);
-                    setRowFeedback(b._id, null);
-
-                    try {
-                      await checkOutBooking(b._id);
-                      await refreshBookings();
-                      setRowFeedback(b._id, { type: 'success', message: 'Checked out successfully.' });
-                    } catch (err) {
-                      setRowFeedback(b._id, {
-                        type: 'error',
-                        message: err.message || 'Could not check out booking'
-                      });
-                    } finally {
-                      setActionLoadingId(null);
-                    }
-                  }}
-                >{actionLoadingId === b._id ? '...' : 'Check out'}</button>
+                  disabled={Boolean(actionLoadingById[b._id])}
+                  onClick={() => handleBookingAction(
+                    b._id,
+                    checkOutBooking,
+                    'Checked out successfully.',
+                    'Could not check out booking'
+                  )}
+                >{actionLoadingById[b._id] ? '...' : 'Check out'}</button>
               )}
             </div>
 

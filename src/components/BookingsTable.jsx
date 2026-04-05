@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { checkInBooking, checkOutBooking, listBookings } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
@@ -23,16 +23,27 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [actionLoadingById, setActionLoadingById] = useState({});
   const [actionFeedbackById, setActionFeedbackById] = useState({});
+  const [recentActionErrors, setRecentActionErrors] = useState([]);
+  const feedbackTimeoutsRef = useRef({});
 
   const setRowFeedback = (bookingId, feedback) => {
+    if (feedbackTimeoutsRef.current[bookingId]) {
+      clearTimeout(feedbackTimeoutsRef.current[bookingId]);
+      delete feedbackTimeoutsRef.current[bookingId];
+    }
+
     setActionFeedbackById((prev) => ({
       ...prev,
       [bookingId]: feedback
     }));
 
-    setTimeout(() => {
+    if (!feedback) {
+      return;
+    }
+
+    feedbackTimeoutsRef.current[bookingId] = setTimeout(() => {
       setActionFeedbackById((prev) => {
         if (!prev[bookingId]) {
           return prev;
@@ -42,7 +53,27 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
         delete next[bookingId];
         return next;
       });
+      delete feedbackTimeoutsRef.current[bookingId];
     }, 3500);
+  };
+
+  const setRowActionLoading = (bookingId, isLoading) => {
+    setActionLoadingById((prev) => {
+      if (isLoading) {
+        return {
+          ...prev,
+          [bookingId]: true
+        };
+      }
+
+      if (!prev[bookingId]) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[bookingId];
+      return next;
+    });
   };
 
   const fetchBookings = useCallback(async () => {
@@ -73,40 +104,67 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
     fetchBookings();
   }, [fetchBookings, refreshKey]);
 
-  const handleQuickCheckIn = async (bookingId) => {
-    setActionLoadingId(bookingId);
+  useEffect(() => {
+    return () => {
+      const activeTimeouts = Object.values(feedbackTimeoutsRef.current);
+      activeTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+      feedbackTimeoutsRef.current = {};
+    };
+  }, []);
+
+  const handleBookingAction = async (
+    bookingId,
+    bookingReference,
+    bookingAction,
+    successMessage,
+    fallbackMessage
+  ) => {
+    setRowActionLoading(bookingId, true);
     setRowFeedback(bookingId, null);
 
     try {
-      await checkInBooking(bookingId);
+      await bookingAction(bookingId);
       await fetchBookings();
-      setRowFeedback(bookingId, { type: 'success', message: 'Checked in successfully.' });
+      setRowFeedback(bookingId, { type: 'success', message: successMessage });
     } catch (err) {
+      const errorMessage = err.message || fallbackMessage;
+
       setRowFeedback(bookingId, {
         type: 'error',
-        message: err.message || 'Could not check in booking'
+        message: errorMessage
       });
+
+      setRecentActionErrors((prev) => [
+        {
+          key: `${bookingId}-${Date.now()}`,
+          reference: bookingReference,
+          message: errorMessage
+        },
+        ...prev
+      ].slice(0, 4));
     } finally {
-      setActionLoadingId(null);
+      setRowActionLoading(bookingId, false);
     }
   };
 
-  const handleQuickCheckOut = async (bookingId) => {
-    setActionLoadingId(bookingId);
-    setRowFeedback(bookingId, null);
+  const handleQuickCheckIn = async (bookingId, bookingReference) => {
+    await handleBookingAction(
+      bookingId,
+      bookingReference,
+      checkInBooking,
+      'Checked in successfully.',
+      'Could not check in booking'
+    );
+  };
 
-    try {
-      await checkOutBooking(bookingId);
-      await fetchBookings();
-      setRowFeedback(bookingId, { type: 'success', message: 'Checked out successfully.' });
-    } catch (err) {
-      setRowFeedback(bookingId, {
-        type: 'error',
-        message: err.message || 'Could not check out booking'
-      });
-    } finally {
-      setActionLoadingId(null);
-    }
+  const handleQuickCheckOut = async (bookingId, bookingReference) => {
+    await handleBookingAction(
+      bookingId,
+      bookingReference,
+      checkOutBooking,
+      'Checked out successfully.',
+      'Could not check out booking'
+    );
   };
 
   const getGuestName = (booking) => {
@@ -208,81 +266,111 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       )}
 
       {!loading && !error && filteredBookings.length > 0 && (
-        <div className="bookings-table-scroll">
-          <table className="bookings-table">
-            <thead>
-              <tr>
-                <th>Reference</th>
-                <th>Guest</th>
-                <th>Room</th>
-                <th>Check-In</th>
-                <th>Check-Out</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+        <>
+          {recentActionErrors.length > 0 && (
+            <div className="ops-errors-card" role="status" aria-live="polite">
+              <div className="ops-errors-card-header">
+                <strong>Recent operation errors</strong>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setRecentActionErrors([])}
+                >
+                  Clear
+                </button>
+              </div>
 
-            <tbody>
-              {filteredBookings.map((booking) => (
-                <tr key={booking._id}>
-                  <td className="booking-reference">{booking._id.slice(-6).toUpperCase()}</td>
-                  <td>{getGuestName(booking)}</td>
-                  <td>{getRoomLabel(booking)}</td>
-                  <td>{formatDisplayDate(booking.checkIn || booking.checkInDate)}</td>
-                  <td>{formatDisplayDate(booking.checkOut || booking.checkOutDate)}</td>
-                  <td>
-                    <span className={`status-badge ${getStatusClass(booking.status)}`}>
-                      {booking.status || 'Unknown'}
-                    </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        className="secondary-button"
-                        onClick={() => onViewBooking?.(booking)}
-                      >
-                        View
-                      </button>
+              <ul className="ops-errors-list">
+                {recentActionErrors.map((errorItem) => (
+                  <li key={errorItem.key}>
+                    <span className="ops-errors-ref">#{errorItem.reference}</span>
+                    <span>{errorItem.message}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-                      {canCheckIn(booking.status) && (
-                        <button
-                          className="primary-button"
-                          disabled={actionLoadingId === booking._id}
-                          onClick={() => handleQuickCheckIn(booking._id)}
-                        >
-                          {actionLoadingId === booking._id ? '...' : 'Check in'}
-                        </button>
-                      )}
-
-                      {canCheckOut(booking.status) && (
-                        <button
-                          className="primary-button"
-                          disabled={actionLoadingId === booking._id}
-                          onClick={() => handleQuickCheckOut(booking._id)}
-                        >
-                          {actionLoadingId === booking._id ? '...' : 'Check out'}
-                        </button>
-                      )}
-                    </div>
-
-                    {actionFeedbackById[booking._id] && (
-                      <p
-                        className={
-                          actionFeedbackById[booking._id].type === 'error'
-                            ? 'form-feedback form-feedback-error'
-                            : 'form-feedback form-feedback-success'
-                        }
-                        style={{ marginTop: '8px' }}
-                      >
-                        {actionFeedbackById[booking._id].message}
-                      </p>
-                    )}
-                  </td>
+          <div className="bookings-table-scroll">
+            <table className="bookings-table">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Guest</th>
+                  <th>Room</th>
+                  <th>Check-In</th>
+                  <th>Check-Out</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {filteredBookings.map((booking) => {
+                  const bookingReference = booking._id.slice(-6).toUpperCase();
+
+                  return (
+                    <tr key={booking._id}>
+                      <td className="booking-reference">{bookingReference}</td>
+                      <td>{getGuestName(booking)}</td>
+                      <td>{getRoomLabel(booking)}</td>
+                      <td>{formatDisplayDate(booking.checkIn || booking.checkInDate)}</td>
+                      <td>{formatDisplayDate(booking.checkOut || booking.checkOutDate)}</td>
+                      <td>
+                        <span className={`status-badge ${getStatusClass(booking.status)}`}>
+                          {booking.status || 'Unknown'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            className="secondary-button"
+                            onClick={() => onViewBooking?.(booking)}
+                          >
+                            View
+                          </button>
+
+                          {canCheckIn(booking.status) && (
+                            <button
+                              className="primary-button"
+                              disabled={Boolean(actionLoadingById[booking._id])}
+                              onClick={() => handleQuickCheckIn(booking._id, bookingReference)}
+                            >
+                              {actionLoadingById[booking._id] ? '...' : 'Check in'}
+                            </button>
+                          )}
+
+                          {canCheckOut(booking.status) && (
+                            <button
+                              className="primary-button"
+                              disabled={Boolean(actionLoadingById[booking._id])}
+                              onClick={() => handleQuickCheckOut(booking._id, bookingReference)}
+                            >
+                              {actionLoadingById[booking._id] ? '...' : 'Check out'}
+                            </button>
+                          )}
+                        </div>
+
+                        {actionFeedbackById[booking._id] && (
+                          <p
+                            className={
+                              actionFeedbackById[booking._id].type === 'error'
+                                ? 'form-feedback form-feedback-error'
+                                : 'form-feedback form-feedback-success'
+                            }
+                            style={{ marginTop: '8px' }}
+                          >
+                            {actionFeedbackById[booking._id].message}
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

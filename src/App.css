@@ -1566,6 +1566,59 @@ a {
   color: #a89d92;
 }
 
+.ops-errors-card {
+  margin-bottom: 12px;
+  background: rgba(227, 109, 97, 0.1);
+  border: 1px solid rgba(227, 109, 97, 0.38);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.ops-errors-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ops-errors-card-header strong {
+  font-size: 0.8rem;
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f2c4bd;
+}
+
+.ops-errors-card .secondary-button {
+  min-width: 78px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.ops-errors-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.ops-errors-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f7d8d3;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.ops-errors-ref {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #f2c4bd;
+}
+
 .bookings-header-controls {
   display: flex;
   align-items: center;
