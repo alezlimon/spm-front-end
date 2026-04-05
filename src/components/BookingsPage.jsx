@@ -57,7 +57,6 @@ export default function BookingsPage() {
           onClose={() => setSelectedBookingId(null)}
           onUpdated={() => {
             setRefreshKey((k) => k + 1);
-            setSelectedBookingId(null);
           }}
         />
       )}

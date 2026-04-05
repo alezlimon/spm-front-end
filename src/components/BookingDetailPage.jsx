@@ -32,6 +32,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
   const [loadingError, setLoadingError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
 
   useEffect(() => {
     const loadBooking = async () => {
@@ -43,6 +44,7 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
       setLoading(true);
       setLoadingError('');
+      setActionSuccess('');
 
       try {
         const bookingData = await getBookingById(bookingId);
@@ -65,12 +67,14 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
     setActionLoading(true);
     setActionError('');
+    setActionSuccess('');
 
     try {
       await checkInBooking(booking._id);
       const freshBooking = await getBookingById(booking._id);
       setBooking(freshBooking || booking);
       onUpdated?.();
+      setActionSuccess('Booking checked in successfully.');
     } catch (error) {
       setActionError(error.message || 'Could not check in booking');
     } finally {
@@ -85,12 +89,14 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
 
     setActionLoading(true);
     setActionError('');
+    setActionSuccess('');
 
     try {
       await checkOutBooking(booking._id);
       const freshBooking = await getBookingById(booking._id);
       setBooking(freshBooking || booking);
       onUpdated?.();
+      setActionSuccess('Booking checked out successfully.');
     } catch (error) {
       setActionError(error.message || 'Could not check out booking');
     } finally {
@@ -166,12 +172,14 @@ export default function BookingDetailPage({ bookingId, onClose, onUpdated }) {
           </div>
 
           <ErrorState message={actionError} />
+          {actionSuccess && <p className="form-feedback form-feedback-success">{actionSuccess}</p>}
 
           <AssignGuestToBooking
             bookingId={booking._id}
             onSuccess={() => {
               setActionError('');
               onUpdated?.();
+              setActionSuccess('Guest assignment updated successfully.');
             }}
           />
             </>
