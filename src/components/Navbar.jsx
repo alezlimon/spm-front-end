@@ -1,25 +1,68 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+
+const navStyle = {
+  background: 'rgba(5, 6, 8, 0.82)',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+  backdropFilter: 'blur(14px)',
+  position: 'sticky',
+  top: 0,
+  zIndex: 100,
+  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)'
+};
+
+const navInnerStyle = {
+  maxWidth: '1360px',
+  margin: '0 auto',
+  padding: '0 32px',
+  minHeight: '72px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '20px'
+};
+
+const brandStyle = {
+  color: '#F5F7FA',
+  textDecoration: 'none',
+  fontWeight: 600,
+  fontSize: '1.08rem',
+  letterSpacing: '-0.05em'
+};
+
+const logoutStyle = {
+  color: 'rgba(245, 247, 250, 0.82)',
+  textDecoration: 'none',
+  fontWeight: 500,
+  fontSize: '0.88rem',
+  letterSpacing: '0.01em',
+  transition: 'color 0.18s ease',
+  background: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid rgba(255, 255, 255, 0.07)',
+  cursor: 'pointer',
+  borderRadius: '999px',
+  padding: '8px 12px'
+};
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <nav style={{
-      background: '#111827',
-      padding: '12px 0',
-      marginBottom: 32,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-    }}>
-      <div style={{
-        maxWidth: 900,
-        margin: '0 auto',
-        display: 'flex',
-        gap: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <NavLink to="/" style={({ isActive }) => ({ color: isActive ? '#60a5fa' : '#fff', fontWeight: 600, textDecoration: 'none', fontSize: '1.1em' })} end>Home</NavLink>
-        <NavLink to="/guests" style={({ isActive }) => ({ color: isActive ? '#60a5fa' : '#fff', fontWeight: 600, textDecoration: 'none', fontSize: '1.1em' })}>Guests</NavLink>
-        <NavLink to="/rooms" style={({ isActive }) => ({ color: isActive ? '#60a5fa' : '#fff', fontWeight: 600, textDecoration: 'none', fontSize: '1.1em' })}>Rooms</NavLink>
-        <NavLink to="/bookings" style={({ isActive }) => ({ color: isActive ? '#60a5fa' : '#fff', fontWeight: 600, textDecoration: 'none', fontSize: '1.1em' })}>Bookings</NavLink>
+    <nav style={navStyle}>
+      <div style={navInnerStyle}>
+        <NavLink to="/properties" style={brandStyle}>
+          Reva
+        </NavLink>
+
+        <button type="button" style={logoutStyle} onClick={handleLogout}>
+          Log out
+        </button>
       </div>
     </nav>
   );

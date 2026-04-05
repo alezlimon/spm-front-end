@@ -1,186 +1,314 @@
-
-
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { listAllBookings } from '../api/bookingsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
+import { listRooms, updateRoom } from '../api/roomsApi';
+import BookingDetailPage from './BookingDetailPage';
+import NewBookingModal from './NewBookingModal';
+import { EmptyState, ErrorState, LoadingState } from './PageState';
 import RoomCard from './RoomCard';
-import RoomBookings from './RoomBookings';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
-
+import RoomsTimelineView from './RoomsTimelineView';
+import '../App.css';
 
 export default function RoomsPage() {
+  const { propertyId } = useParams();
   const [rooms, setRooms] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [viewMode, setViewMode] = useState('timeline');
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchData = async () => {
       setLoading(true);
       setError('');
+
       try {
-        const res = await fetch(`${API_URL}/rooms`);
-        if (!res.ok) throw new Error('Error fetching rooms');
-        const data = await res.json();
-        setRooms(data);
-      } catch (err) {
+        const [roomsData, bookingsData] = await Promise.all([
+          propertyId ? listPropertyRooms(propertyId) : listRooms(),
+          listAllBookings()
+        ]);
+
+        setRooms(roomsData);
+        setBookings(bookingsData);
+      } catch {
         setError('Could not load rooms');
       } finally {
         setLoading(false);
       }
     };
-    fetchRooms();
-  }, []);
 
-  const getStatusClass = (status) => {
-    if (status === 'Available') return 'status-available';
-    if (status === 'Occupied') return 'status-occupied';
-    if (status === 'Maintenance') return 'status-maintenance';
-    if (status === 'Dirty') return 'status-dirty';
-    return '';
+    fetchData();
+  }, [propertyId, refreshKey]);
+
+  const updateRoomStatus = async (roomId, newStatus, extraPayload = {}) => {
+    const payload = { status: newStatus, ...extraPayload };
+
+    try {
+      const updatedRoom = await updateRoom(roomId, payload);
+
+      setRooms((prevRooms) =>
+        prevRooms.map((room) =>
+          room._id === roomId ? { ...room, ...payload, ...updatedRoom } : room
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const updateRoomStatus = (roomId, newStatus) => {
-    fetch(`${API_URL}/rooms/${roomId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then((res) => res.json())
-      .then((updatedRoom) => {
-        setRooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room._id === updatedRoom._id ? updatedRoom : room
-          )
-        );
-      })
-      .catch((err) => console.error(err));
+  const getCurrentBookingForRoom = (roomId) => {
+    const roomBookings = bookings.filter((booking) => {
+      if (!booking.room) return false;
+
+      const bookingRoomId =
+        typeof booking.room === 'string' ? booking.room : booking.room._id;
+
+      return bookingRoomId === roomId;
+    });
+
+    if (roomBookings.length === 0) return null;
+
+    const activeStatuses = ['confirmed', 'checked-in'];
+
+    const prioritizedBooking =
+      roomBookings.find((booking) =>
+        booking.status ? activeStatuses.includes(booking.status.toLowerCase()) : false
+      ) || roomBookings[0];
+
+    return prioritizedBooking;
   };
 
   const totalRooms = rooms.length;
-  const availableRooms = rooms.filter((r) => r.status === 'Available').length;
-  const occupiedRooms = rooms.filter((r) => r.status === 'Occupied').length;
-  const dirtyRooms = rooms.filter((r) => r.status === 'Dirty').length;
-  const maintenanceRooms = rooms.filter((r) => r.status === 'Maintenance').length;
+  const occupiedRooms = rooms.filter((room) => room.status === 'Occupied').length;
+  const maintenanceRooms = rooms.filter((room) => room.status === 'Maintenance').length;
+  const readyRooms = rooms.filter(
+    (room) => room.status === 'Available' && room.isClean
+  ).length;
 
-  const occupancyRate =
-    totalRooms === 0 ? 0 : Math.round((occupiedRooms / totalRooms) * 100);
-
-  const getPriorityAlert = () => {
-    if (dirtyRooms >= 2) {
-      return 'Priority alert: multiple rooms need cleaning.';
-    }
-    if (maintenanceRooms >= 1) {
-      return 'Attention: at least one room is under maintenance.';
-    }
-    if (occupancyRate >= 80) {
-      return 'High occupancy detected. Room turnover should stay efficient.';
-    }
-    return 'Operations are stable right now.';
+  const getOperationalState = (room) => {
+    if (room.status === 'Maintenance') return 'Out of Service';
+    if (room.status === 'Occupied') return 'Occupied';
+    if (room.status === 'Available' && room.isClean) return 'Ready';
+    return 'Dirty';
   };
 
-  const generateSummary = () => {
-    if (rooms.length === 0) return '';
-    return `Occupancy is at ${occupancyRate}%. You have ${availableRooms} available, ${occupiedRooms} occupied, ${dirtyRooms} dirty, and ${maintenanceRooms} in maintenance.`;
-  };
+  const dirtyRooms = rooms.filter(
+    (room) => getOperationalState(room) === 'Dirty'
+  ).length;
 
-  const getAssistantClass = () => {
-    if (dirtyRooms >= 2) return 'assistant alert-high';
-    if (occupancyRate >= 80) return 'assistant alert-medium';
-    return 'assistant alert-low';
-  };
+  const filterOptions = [
+    { key: 'All', label: 'All', count: totalRooms },
+    { key: 'Ready', label: 'Ready', count: readyRooms },
+    { key: 'Dirty', label: 'Dirty', count: dirtyRooms },
+    { key: 'Occupied', label: 'Occupied', count: occupiedRooms },
+    { key: 'Out of Service', label: 'Out of Service', count: maintenanceRooms }
+  ];
 
-  const getCleaningSuggestion = () => {
-    const dirtyRoomList = rooms.filter((room) => room.status === 'Dirty');
-    if (dirtyRoomList.length === 0) {
-      return 'No cleaning suggestion right now.';
-    }
-    return `Suggested action: clean Room ${dirtyRoomList[0].roomNumber} first.`;
+  const getRoomSortScore = (room) => {
+    const operationalState = getOperationalState(room);
+    if (operationalState === 'Dirty') return 0;
+    if (operationalState === 'Ready') return 1;
+    if (operationalState === 'Occupied') return 2;
+    return 3;
   };
 
   const filteredRooms = rooms
     .filter((room) => {
       if (filter === 'All') return true;
-      return room.status === filter;
+      return getOperationalState(room) === filter;
     })
     .filter((room) => {
       const searchValue = searchTerm.toLowerCase();
+      const operationalState = getOperationalState(room).toLowerCase();
+
       return (
         room.roomNumber.toLowerCase().includes(searchValue) ||
         room.type.toLowerCase().includes(searchValue) ||
-        room.status.toLowerCase().includes(searchValue)
+        room.status.toLowerCase().includes(searchValue) ||
+        operationalState.includes(searchValue)
       );
     });
 
+  const sortedRooms = [...filteredRooms].sort((a, b) => {
+    const scoreA = getRoomSortScore(a);
+    const scoreB = getRoomSortScore(b);
+
+    if (scoreA !== scoreB) {
+      return scoreA - scoreB;
+    }
+
+    const roomNumberA = Number.parseInt(String(a.roomNumber), 10);
+    const roomNumberB = Number.parseInt(String(b.roomNumber), 10);
+
+    if (!Number.isNaN(roomNumberA) && !Number.isNaN(roomNumberB)) {
+      return roomNumberA - roomNumberB;
+    }
+
+    return String(a.roomNumber).localeCompare(String(b.roomNumber));
+  });
+
   return (
-    <div className="rooms-page">
-      <header className="header">
-        <h1>Rooms</h1>
-        <p>Room management and operations dashboard</p>
-      </header>
-      <div className={getAssistantClass()}>
-        <h3>Operations Assistant</h3>
-        <p>{generateSummary()}</p>
-        <p className="assistant-alert">{getPriorityAlert()}</p>
-        <p className="assistant-suggestion">{getCleaningSuggestion()}</p>
-      </div>
-      <section className="summary-grid">
-        <div className="summary-card" onClick={() => setFilter('All')}>
-          <h3>Total Rooms</h3>
-          <p>{totalRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Available')}>
-          <h3>Available</h3>
-          <p>{availableRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Occupied')}>
-          <h3>Occupied</h3>
-          <p>{occupiedRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Maintenance')}>
-          <h3>Maintenance</h3>
-          <p>{maintenanceRooms}</p>
-        </div>
-        <div className="summary-card" onClick={() => setFilter('Dirty')}>
-          <h3>Dirty</h3>
-          <p>{dirtyRooms}</p>
-        </div>
-      </section>
-      <div className="filter-bar">
-        <button onClick={() => setFilter('All')}>All</button>
-        <button onClick={() => setFilter('Available')}>Available</button>
-        <button onClick={() => setFilter('Occupied')}>Occupied</button>
-        <button onClick={() => setFilter('Maintenance')}>Maintenance</button>
-        <button onClick={() => setFilter('Dirty')}>Dirty</button>
-      </div>
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Search by room number, type, or status"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-      <section>
-        <h2>Rooms</h2>
-        {loading && <p style={{color:'#6b7280'}}>Loading rooms...</p>}
-        {error && <p style={{color:'#b91c1c'}}>{error}</p>}
-        {filteredRooms.length === 0 ? (
-          <p>No rooms found</p>
-        ) : (
-          <div className="rooms-grid">
-            {filteredRooms.map((room) => (
-              <RoomCard
-                key={room._id}
-                room={room}
-                getStatusClass={getStatusClass}
-                updateRoomStatus={updateRoomStatus}
-              />
-            ))}
+    <div className="app">
+      <header className="header bookings-page-header-row">
+        <div>
+          <h1>Rooms</h1>
+          <p>Run front desk operations fast: know what is ready, blocked, occupied, or out of service.</p>
+          <div className="rooms-view-toggle" role="tablist" aria-label="Rooms view mode">
+            <button
+              type="button"
+              className={viewMode === 'timeline' ? 'active' : ''}
+              onClick={() => setViewMode('timeline')}
+            >
+              Timeline
+            </button>
+            <button
+              type="button"
+              className={viewMode === 'cards' ? 'active' : ''}
+              onClick={() => setViewMode('cards')}
+            >
+              Cards
+            </button>
           </div>
-        )}
-      </section>
+        </div>
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => setShowModal(true)}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+            style={{ marginRight: '7px' }}
+          >
+            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+          </svg>
+          New reservation
+        </button>
+      </header>
+
+      <div className="rooms-layout">
+        <section className="rooms-toolbar">
+          <div className="rooms-kpi-strip">
+            <div className="summary-card">
+              <h3>Total Rooms</h3>
+              <p>{totalRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Ready')}>
+              <h3>Ready</h3>
+              <p>{readyRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Dirty')}>
+              <h3>Dirty</h3>
+              <p>{dirtyRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Occupied')}>
+              <h3>Occupied</h3>
+              <p>{occupiedRooms}</p>
+            </div>
+
+            <div className="summary-card" onClick={() => setFilter('Out of Service')}>
+              <h3>Out of Service</h3>
+              <p>{maintenanceRooms}</p>
+            </div>
+          </div>
+
+          <div className="rooms-controls">
+            <div>
+              <h3 className="rooms-section-title">Operational Filters</h3>
+              <div className="rooms-filter-pills" role="tablist" aria-label="Room operational filters">
+                {filterOptions.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`rooms-filter-pill rooms-filter-pill-${option.key.toLowerCase().replace(/\s+/g, '-')} ${filter === option.key ? 'active' : ''}`}
+                    onClick={() => setFilter(option.key)}
+                  >
+                    <span>{option.label}</span>
+                    <strong>{option.count}</strong>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="rooms-section-title">Search</h3>
+              <div className="search-bar">
+                <input
+                  type="text"
+                  placeholder="Search by room number, type, or status"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          {loading && <LoadingState message="Loading rooms..." />}
+          {!loading && <ErrorState message={error} />}
+
+          {!loading && !error && filteredRooms.length === 0 && (
+            <EmptyState message="No rooms match the current filters." />
+          )}
+
+          {!loading && !error && filteredRooms.length > 0 && viewMode === 'cards' && (
+            <div className="rooms-grid">
+              {sortedRooms.map((room) => (
+                <RoomCard
+                  key={room._id}
+                  room={room}
+                  currentBooking={getCurrentBookingForRoom(room._id)}
+                  updateRoomStatus={updateRoomStatus}
+                />
+              ))}
+            </div>
+          )}
+
+          {!loading && !error && filteredRooms.length > 0 && viewMode === 'timeline' && (
+            <RoomsTimelineView
+              rooms={sortedRooms}
+              bookings={bookings}
+              onViewBooking={(booking) => setSelectedBookingId(booking._id)}
+            />
+          )}
+        </section>
+      </div>
+
+      {selectedBookingId && (
+        <BookingDetailPage
+          bookingId={selectedBookingId}
+          onClose={() => setSelectedBookingId(null)}
+          onUpdated={() => {
+            setSelectedBookingId(null);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
+
+      {showModal && (
+        <NewBookingModal
+          propertyId={propertyId}
+          onClose={() => setShowModal(false)}
+          onCreated={() => {
+            setShowModal(false);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,61 +1,160 @@
-
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { listAllBookings } from '../api/bookingsApi';
+import { listGuests } from '../api/guestsApi';
+import { listPropertyRooms } from '../api/propertiesApi';
+import { ErrorState, LoadingState } from './PageState';
 import NewGuestForm from './NewGuestForm';
 import GuestList from './GuestList';
+import '../App.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+const getEntityId = (value) => {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  return value._id || value.id || null;
+};
+
+const filterScopedGuests = (guestList, guestIds) => {
+  if (!Array.isArray(guestIds)) {
+    return guestList;
+  }
+
+  const allowedGuestIds = new Set(guestIds);
+  return guestList.filter((guest) => allowedGuestIds.has(guest._id));
+};
 
 export default function GuestsPage() {
+  const { propertyId } = useParams();
   const [guests, setGuests] = useState([]);
   const [search, setSearch] = useState('');
+  const [scopedGuestIds, setScopedGuestIds] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const searchDebounceRef = useRef(null);
 
-  const fetchGuests = async (query = '') => {
+  const fetchGuests = async (query = '', overrideGuestIds = scopedGuestIds) => {
     setLoading(true);
     setError('');
+
     try {
-      const url = query
-        ? `${API_URL}/guests/search?query=${encodeURIComponent(query)}`
-        : `${API_URL}/guests`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Error fetching guests');
-      const data = await res.json();
-      setGuests(data);
-    } catch (err) {
-      setError('No se pudieron cargar los huéspedes');
+      const data = await listGuests(query);
+      const safeData = data || [];
+
+      setGuests(
+        !propertyId || !Array.isArray(overrideGuestIds)
+          ? safeData
+          : filterScopedGuests(safeData, overrideGuestIds)
+      );
+    } catch {
+      setError('Could not load guests');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchGuests();
-  }, []);
+    const loadScope = async () => {
+      if (!propertyId) {
+        setScopedGuestIds(null);
+        setLoading(true);
+        setError('');
+
+        try {
+          const guestData = await listGuests('');
+          setGuests(guestData || []);
+        } catch {
+          setGuests([]);
+          setError('Could not load guests');
+        } finally {
+          setLoading(false);
+        }
+
+        return;
+      }
+
+      try {
+        const [roomsData, bookingsData] = await Promise.all([
+          listPropertyRooms(propertyId),
+          listAllBookings()
+        ]);
+
+        const roomIds = new Set((roomsData || []).map((room) => room._id));
+        const guestIds = (bookingsData || [])
+          .filter((booking) => {
+            const bookingRoomId = getEntityId(booking.room) || getEntityId(booking.roomId);
+            return bookingRoomId ? roomIds.has(bookingRoomId) : false;
+          })
+          .map((booking) => getEntityId(booking.guest) || getEntityId(booking.guestId))
+          .filter(Boolean);
+
+        setScopedGuestIds(guestIds);
+        const guestData = await listGuests('');
+        setGuests(filterScopedGuests(guestData || [], guestIds));
+      } catch {
+        setScopedGuestIds([]);
+        setGuests([]);
+        setError('Could not load guests');
+      }
+    };
+
+    loadScope();
+  }, [propertyId]);
 
   const handleSearch = (e) => {
-    setSearch(e.target.value);
-    fetchGuests(e.target.value);
+    const value = e.target.value;
+    setSearch(value);
+
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    searchDebounceRef.current = setTimeout(() => {
+      fetchGuests(value);
+    }, 300);
   };
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   const handleGuestCreated = () => {
     fetchGuests(search);
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: '40px auto', padding: 24 }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: 24 }}>Guest Management</h1>
-      <NewGuestForm onGuestCreated={handleGuestCreated} />
-      <input
-        type="text"
-        placeholder="Search by name or document..."
-        value={search}
-        onChange={handleSearch}
-        style={{width:'100%',padding:8,borderRadius:8,border:'1px solid #d1d5db',margin:'16px 0'}}
-      />
-      {loading && <p style={{color:'#6b7280'}}>Loading guests...</p>}
-      {error && <p style={{color:'#b91c1c'}}>{error}</p>}
-      <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />
+    <div className="app">
+      <header className="header">
+        <h1>Guests</h1>
+        <p>Register, search, and update guest profiles in one clean workflow.</p>
+      </header>
+
+      <section className="guests-page-layout">
+        <div className="guests-form-column">
+          <NewGuestForm onGuestCreated={handleGuestCreated} />
+        </div>
+
+        <div className="guests-list-column">
+          <div className="search-bar guests-search-bar">
+            <input
+              type="text"
+              placeholder="Search by name or document"
+              value={search}
+              onChange={handleSearch}
+            />
+          </div>
+
+          {loading && <LoadingState message="Loading guests..." />}
+          {!loading && <ErrorState message={error} />}
+
+          {!loading && !error && (
+            <GuestList guests={guests} onGuestUpdated={() => fetchGuests(search)} />
+          )}
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
+import { assignGuestToBooking } from '../api/bookingsApi';
 import GuestSelector from './GuestSelector';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
 
 export default function AssignGuestToBooking({ bookingId, onSuccess }) {
   const [guestId, setGuestId] = useState('');
@@ -9,18 +8,20 @@ export default function AssignGuestToBooking({ bookingId, onSuccess }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  const handleGuestChange = (selectedGuestId) => {
+    setGuestId(selectedGuestId);
+
+    if (error) setError('');
+    if (success) setSuccess(false);
+  };
+
   const handleAssign = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     setSuccess(false);
     try {
-      const res = await fetch(`${API_URL}/bookings/${bookingId}/assign-guest`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guestId })
-      });
-      if (!res.ok) throw new Error('Could not assign guest');
+      await assignGuestToBooking(bookingId, { guestId });
       setSuccess(true);
       if (onSuccess) onSuccess();
     } catch (err) {
@@ -31,14 +32,19 @@ export default function AssignGuestToBooking({ bookingId, onSuccess }) {
   };
 
   return (
-    <form onSubmit={handleAssign} style={{background:'#fff',borderRadius:12,padding:16,marginBottom:16}}>
-      <h3 style={{margin:'0 0 8px'}}>Assign guest to booking</h3>
-      <GuestSelector value={guestId} onChange={setGuestId} />
-      <button type="submit" disabled={loading || !guestId} style={{background:'#111827',color:'#fff',border:'none',borderRadius:8,padding:10,fontWeight:600}}>
+    <form className="guest-form-card" onSubmit={handleAssign}>
+      <div className="guest-form-header">
+        <h3 style={{ margin: 0 }}>Assign guest to booking</h3>
+      </div>
+
+      <GuestSelector value={guestId} onChange={handleGuestChange} />
+
+      <button type="submit" className="primary-button" disabled={loading || !guestId || success}>
         {loading ? 'Assigning...' : 'Assign Guest'}
       </button>
-      {error && <p style={{color:'#b91c1c',margin:0}}>{error}</p>}
-      {success && <p style={{color:'#059669',margin:0}}>Guest assigned successfully!</p>}
+
+      {error && <p className="form-feedback form-feedback-error">{error}</p>}
+      {success && <p className="form-feedback form-feedback-success">Guest assigned successfully!</p>}
     </form>
   );
 }
