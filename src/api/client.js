@@ -2,6 +2,9 @@ import { getStoredToken } from '../utils/auth';
 import { AUTH_SESSION_EXPIRED_EVENT } from '../utils/events';
 import { buildApiUrl, buildAuthUrl } from './config';
 
+const ENABLE_LEGACY_ERROR_TRANSLATIONS =
+  import.meta.env.VITE_ENABLE_LEGACY_ERROR_TRANSLATIONS !== 'false';
+
 // Temporary fallback for legacy mixed-language backend messages.
 // Remove after backend contract re-validation in staging (target: 2026-04-12).
 const MESSAGE_TRANSLATIONS = new Map([
@@ -21,6 +24,10 @@ const translateMessage = (message) => {
 
   if (!trimmedMessage) {
     return message;
+  }
+
+  if (!ENABLE_LEGACY_ERROR_TRANSLATIONS) {
+    return trimmedMessage;
   }
 
   return MESSAGE_TRANSLATIONS.get(trimmedMessage) || trimmedMessage;

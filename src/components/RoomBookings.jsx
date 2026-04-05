@@ -12,6 +12,25 @@ export default function RoomBookings({ roomId }) {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [actionFeedbackById, setActionFeedbackById] = useState({});
 
+  const setRowFeedback = (bookingId, feedback) => {
+    setActionFeedbackById((prev) => ({
+      ...prev,
+      [bookingId]: feedback
+    }));
+
+    setTimeout(() => {
+      setActionFeedbackById((prev) => {
+        if (!prev[bookingId]) {
+          return prev;
+        }
+
+        const next = { ...prev };
+        delete next[bookingId];
+        return next;
+      });
+    }, 3500);
+  };
+
   const refreshBookings = useCallback(async () => {
     const data = await listRoomBookings(roomId);
     setBookings(data || []);
@@ -60,23 +79,17 @@ export default function RoomBookings({ roomId }) {
                   disabled={actionLoadingId === b._id}
                   onClick={async () => {
                     setActionLoadingId(b._id);
-                    setActionFeedbackById((prev) => ({ ...prev, [b._id]: null }));
+                    setRowFeedback(b._id, null);
 
                     try {
                       await checkInBooking(b._id);
                       await refreshBookings();
-                      setActionFeedbackById((prev) => ({
-                        ...prev,
-                        [b._id]: { type: 'success', message: 'Checked in successfully.' }
-                      }));
+                      setRowFeedback(b._id, { type: 'success', message: 'Checked in successfully.' });
                     } catch (err) {
-                      setActionFeedbackById((prev) => ({
-                        ...prev,
-                        [b._id]: {
-                          type: 'error',
-                          message: err.message || 'Could not check in booking'
-                        }
-                      }));
+                      setRowFeedback(b._id, {
+                        type: 'error',
+                        message: err.message || 'Could not check in booking'
+                      });
                     } finally {
                       setActionLoadingId(null);
                     }
@@ -89,23 +102,17 @@ export default function RoomBookings({ roomId }) {
                   disabled={actionLoadingId === b._id}
                   onClick={async () => {
                     setActionLoadingId(b._id);
-                    setActionFeedbackById((prev) => ({ ...prev, [b._id]: null }));
+                    setRowFeedback(b._id, null);
 
                     try {
                       await checkOutBooking(b._id);
                       await refreshBookings();
-                      setActionFeedbackById((prev) => ({
-                        ...prev,
-                        [b._id]: { type: 'success', message: 'Checked out successfully.' }
-                      }));
+                      setRowFeedback(b._id, { type: 'success', message: 'Checked out successfully.' });
                     } catch (err) {
-                      setActionFeedbackById((prev) => ({
-                        ...prev,
-                        [b._id]: {
-                          type: 'error',
-                          message: err.message || 'Could not check out booking'
-                        }
-                      }));
+                      setRowFeedback(b._id, {
+                        type: 'error',
+                        message: err.message || 'Could not check out booking'
+                      });
                     } finally {
                       setActionLoadingId(null);
                     }

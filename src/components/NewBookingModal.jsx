@@ -126,7 +126,11 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
   const parseErrorMessage = (status, data) => {
     if (status === 409) {
-      return 'Guest already exists - will be reused for this reservation';
+      if (data?.errorCode === 'GUEST_DUPLICATE') {
+        return 'Guest already exists. Select an existing guest from search.';
+      }
+
+      return getErrorMessage(data, 'Conflict while creating reservation');
     }
     if (status === 401) {
       return 'Session expired - please log in again';

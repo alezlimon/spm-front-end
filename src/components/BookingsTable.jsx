@@ -26,6 +26,25 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [actionFeedbackById, setActionFeedbackById] = useState({});
 
+  const setRowFeedback = (bookingId, feedback) => {
+    setActionFeedbackById((prev) => ({
+      ...prev,
+      [bookingId]: feedback
+    }));
+
+    setTimeout(() => {
+      setActionFeedbackById((prev) => {
+        if (!prev[bookingId]) {
+          return prev;
+        }
+
+        const next = { ...prev };
+        delete next[bookingId];
+        return next;
+      });
+    }, 3500);
+  };
+
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -56,26 +75,17 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
   const handleQuickCheckIn = async (bookingId) => {
     setActionLoadingId(bookingId);
-    setActionFeedbackById((prev) => ({
-      ...prev,
-      [bookingId]: null
-    }));
+    setRowFeedback(bookingId, null);
 
     try {
       await checkInBooking(bookingId);
       await fetchBookings();
-      setActionFeedbackById((prev) => ({
-        ...prev,
-        [bookingId]: { type: 'success', message: 'Checked in successfully.' }
-      }));
+      setRowFeedback(bookingId, { type: 'success', message: 'Checked in successfully.' });
     } catch (err) {
-      setActionFeedbackById((prev) => ({
-        ...prev,
-        [bookingId]: {
-          type: 'error',
-          message: err.message || 'Could not check in booking'
-        }
-      }));
+      setRowFeedback(bookingId, {
+        type: 'error',
+        message: err.message || 'Could not check in booking'
+      });
     } finally {
       setActionLoadingId(null);
     }
@@ -83,26 +93,17 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
 
   const handleQuickCheckOut = async (bookingId) => {
     setActionLoadingId(bookingId);
-    setActionFeedbackById((prev) => ({
-      ...prev,
-      [bookingId]: null
-    }));
+    setRowFeedback(bookingId, null);
 
     try {
       await checkOutBooking(bookingId);
       await fetchBookings();
-      setActionFeedbackById((prev) => ({
-        ...prev,
-        [bookingId]: { type: 'success', message: 'Checked out successfully.' }
-      }));
+      setRowFeedback(bookingId, { type: 'success', message: 'Checked out successfully.' });
     } catch (err) {
-      setActionFeedbackById((prev) => ({
-        ...prev,
-        [bookingId]: {
-          type: 'error',
-          message: err.message || 'Could not check out booking'
-        }
-      }));
+      setRowFeedback(bookingId, {
+        type: 'error',
+        message: err.message || 'Could not check out booking'
+      });
     } finally {
       setActionLoadingId(null);
     }

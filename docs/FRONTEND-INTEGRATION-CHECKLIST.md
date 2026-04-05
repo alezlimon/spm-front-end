@@ -56,6 +56,7 @@ Update from backend on 2026-04-05:
 
 - Keep temporary translation fallback in `src/api/client.js` until 2026-04-12.
 - Remove fallback map after backend contract is validated again in staging.
+- Runtime toggle is available: `VITE_ENABLE_LEGACY_ERROR_TRANSLATIONS=false`.
 
 ## Frontend implementation rule
 
