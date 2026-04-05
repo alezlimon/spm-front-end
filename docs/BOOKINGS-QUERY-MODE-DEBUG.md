@@ -104,3 +104,15 @@ Also supported: `bookings` as items key and `meta` as pagination key.
 - Preview path includes `from=...&to=...`
 3. Trigger one filter change and confirm table refreshes without stale flash.
 4. Confirm backend logs show `from/to` params for the request.
+
+## Validation log template
+
+Use this when validating in staging with backend:
+
+- Date tested:
+- Environment URL:
+- Active mode observed in UI hint:
+- Sample request path captured:
+- Backend logs confirmed `from/to`:
+- Filters and pagination behavior OK (yes/no):
+- Rooms/Guests regressions observed (yes/no + details):

@@ -111,9 +111,10 @@ Equipo, para avanzar rapido y con menos deuda en frontend queremos empujar la ma
 - [x] Diagnostico dev del modo de query bookings visible en runtime.
 - [x] Guia FE-BE de debug para query mode de bookings publicada (`docs/BOOKINGS-QUERY-MODE-DEBUG.md`).
 - [x] Limite configurable de paginas en `listAllBookings` para evitar carga excesiva (`VITE_MAX_ALL_BOOKINGS_PAGES`).
+- [x] Vista de bookings por propiedad usa fetch paginated-safe (evita lista vacia con respuesta paginada).
 
 ## 10) Siguiente bloque FE (pendiente)
 
 - [ ] Remover fallback de traduccion FE tras validacion de staging (objetivo: 2026-04-12).
 - [x] Confirmar con backend el modo final de query params (`date` vs `from/to`) y fijar `VITE_BOOKINGS_QUERY_MODE`.
-- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range`.
+- [ ] Validar en staging los ejemplos de `docs/BOOKINGS-QUERY-MODE-DEBUG.md` con `MODE: range` y completar log de validacion.

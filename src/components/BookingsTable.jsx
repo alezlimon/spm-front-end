@@ -5,7 +5,7 @@ import {
   buildBookingsDebugPath,
   checkInBooking,
   checkOutBooking,
-  listBookings,
+  listAllBookings,
   listBookingsPage
 } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
@@ -109,7 +109,7 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
       if (propertyId) {
         const [roomsData, bookingsData] = await Promise.all([
           listPropertyRooms(propertyId),
-          listBookings({ signal: requestController.signal })
+          listAllBookings({}, { signal: requestController.signal })
         ]);
 
         if (requestSequenceRef.current !== requestSequence) {
