@@ -14,19 +14,19 @@ const navStyle = {
 const navInnerStyle = {
   maxWidth: '1360px',
   margin: '0 auto',
-  padding: '0 32px',
-  minHeight: '72px',
+  padding: '0 clamp(12px, 4vw, 32px)',
+  minHeight: '64px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: '20px'
+  gap: '12px'
 };
 
 const brandStyle = {
   color: '#F5F7FA',
   textDecoration: 'none',
   fontWeight: 600,
-  fontSize: '1.08rem',
+  fontSize: 'clamp(1rem, 2.8vw, 1.08rem)',
   letterSpacing: '-0.05em'
 };
 
@@ -41,7 +41,8 @@ const logoutStyle = {
   border: '1px solid rgba(255, 255, 255, 0.07)',
   cursor: 'pointer',
   borderRadius: '999px',
-  padding: '8px 12px'
+  padding: '7px 12px',
+  whiteSpace: 'nowrap'
 };
 
 export default function Navbar() {

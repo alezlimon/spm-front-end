@@ -2917,6 +2917,172 @@ a {
   margin: 0;
 }
 
+@media (max-width: 767px) {
+  .app {
+    padding: 18px 14px 34px;
+  }
+
+  .header {
+    margin-bottom: 18px;
+  }
+
+  .header h1 {
+    font-size: 1.9rem;
+    letter-spacing: -0.05em;
+  }
+
+  .header p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .summary-card,
+  .guest-form-card,
+  .guest-card,
+  .room-card,
+  .bookings-table-wrapper,
+  .rooms-controls,
+  .billing-controls {
+    border-radius: 14px;
+  }
+
+  .summary-card {
+    padding: 14px;
+  }
+
+  .summary-card h3 {
+    font-size: 0.68rem;
+  }
+
+  .summary-card p {
+    font-size: 1.24rem;
+  }
+
+  .bookings-page-header-row {
+    gap: 10px;
+  }
+
+  .bookings-page-header-row .primary-button {
+    width: 100%;
+  }
+
+  .rooms-view-toggle {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .rooms-view-toggle button {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+  }
+
+  .rooms-kpi-strip,
+  .properties-portfolio-kpis,
+  .billing-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rooms-controls {
+    position: static;
+    top: auto;
+  }
+
+  .rooms-filter-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .rooms-filter-pill {
+    flex: 0 0 auto;
+  }
+
+  .properties-page-heading-block-minimal h1 {
+    font-size: 2.3rem;
+    line-height: 0.98;
+  }
+
+  .property-card-image-compact {
+    height: 190px;
+  }
+
+  .property-card-header-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .property-occupancy-block {
+    justify-items: start;
+  }
+
+  .property-card-ops-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .property-card-footer-dashboard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .property-next-arrival-text {
+    text-align: left;
+  }
+
+  .guests-page-layout {
+    gap: 14px;
+  }
+
+  .guest-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-form-grid input[type="date"] {
+    grid-column: auto;
+  }
+
+  .billing-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-table {
+    min-width: 760px;
+  }
+
+  .billing-modal {
+    width: 100%;
+    max-height: 88vh;
+  }
+
+  .billing-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .billing-payments-list li {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rooms-timeline-header,
+  .rooms-timeline-row {
+    min-width: 860px;
+    grid-template-columns: 150px minmax(700px, 1fr);
+  }
+
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-panel {
+    max-width: none;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+}
+
 /* NEW BOOKING MODAL */
 .modal-overlay {
   position: fixed;
