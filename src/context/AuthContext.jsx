@@ -8,6 +8,37 @@ import {
   setStoredToken
 } from '../utils/auth';
 
+function getUserRole(payload) {
+  const directRole = payload?.role;
+  const nestedRole = payload?.user?.role;
+  const roles = payload?.roles || payload?.user?.roles;
+
+  if (typeof directRole === 'string' && directRole.trim()) {
+    return directRole.trim().toLowerCase();
+  }
+
+  if (typeof nestedRole === 'string' && nestedRole.trim()) {
+    return nestedRole.trim().toLowerCase();
+  }
+
+  if (Array.isArray(roles)) {
+    const adminRole = roles.find((role) => typeof role === 'string' && role.trim().toLowerCase() === 'admin');
+    return adminRole ? 'admin' : null;
+  }
+
+  return null;
+}
+
+function assertAdminSession(payload) {
+  const role = getUserRole(payload);
+
+  if (role !== 'admin') {
+    throw new Error('Admin access only. Update backend session payload to include role=admin.');
+  }
+
+  return payload;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(getStoredToken());
@@ -39,7 +70,7 @@ export function AuthProvider({ children }) {
 
       try {
         const payload = await verifyAuthSession(storedToken);
-        setUser(payload);
+        setUser(assertAdminSession(payload));
         setToken(storedToken);
       } catch {
         clearStoredToken();
@@ -74,8 +105,9 @@ export function AuthProvider({ children }) {
       throw new Error('Could not verify session');
     }
 
-    setUser(payload);
-    return payload;
+    const adminPayload = assertAdminSession(payload);
+    setUser(adminPayload);
+    return adminPayload;
   };
 
   const signup = async ({ name, email, password }) => {
@@ -93,6 +125,7 @@ export function AuthProvider({ children }) {
     user,
     token,
     isLoading,
+    isAdmin: getUserRole(user) === 'admin',
     isAuthenticated: Boolean(user && token),
     login,
     signup,

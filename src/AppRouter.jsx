@@ -11,13 +11,13 @@ import PropertyOverviewPage from './components/PropertyOverviewPage';
 import { useAuth } from './context/useAuth';
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
 
   if (isLoading) {
     return <div className="app"><p className="page-feedback">Loading session...</p></div>;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
@@ -26,14 +26,14 @@ function ProtectedRoute({ children }) {
 
 function AppLayout() {
   const location = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
-  const showNavbar = location.pathname !== '/' && isAuthenticated && !isLoading;
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const showNavbar = location.pathname !== '/' && isAuthenticated && isAdmin && !isLoading;
 
   return (
     <>
       {showNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/properties" replace /> : <AuthPage />} />
+        <Route path="/" element={isAuthenticated && isAdmin ? <Navigate to="/properties" replace /> : <AuthPage />} />
         <Route path="/properties" element={<ProtectedRoute><PropertiesPage /></ProtectedRoute>} />
         <Route path="/properties/:propertyId" element={<ProtectedRoute><PropertyLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="overview" replace />} />
