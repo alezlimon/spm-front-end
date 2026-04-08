@@ -57,7 +57,9 @@ const createEmptyMetrics = () => ({
   departuresToday: 0,
   nextArrivalDate: null,
   overdueInvoices: 0,
-  outstandingAmount: 0
+  outstandingAmount: 0,
+  unitStatus: 'Available',
+  propertyType: 'hotel'
 });
 
 const getRoomOperationalState = (room) => {
@@ -94,6 +96,13 @@ const getAttentionScore = (metrics) => {
     + (metrics.arrivalsToday * 8)
     + (metrics.departuresToday * 6)
     + (metrics.outstandingAmount > 0 ? 4 : 0);
+};
+
+const getVillaUnitStatus = (metrics) => {
+  if (metrics.occupiedRooms > 0) return 'Occupied';
+  if (metrics.dirtyRooms > 0) return 'Dirty';
+  if (metrics.outOfServiceRooms > 0) return 'Out of Service';
+  return 'Available';
 };
 
 export default function PropertiesPage() {
@@ -143,9 +152,14 @@ export default function PropertiesPage() {
   const propertyMetricsMap = useMemo(() => {
     const metricsMap = new Map();
     const roomPropertyMap = new Map();
+    const propertyMap = new Map();
 
     properties.forEach((property) => {
-      metricsMap.set(String(property._id), createEmptyMetrics());
+      propertyMap.set(String(property._id), property);
+      metricsMap.set(String(property._id), {
+        ...createEmptyMetrics(),
+        propertyType: property.propertyType || 'hotel'
+      });
     });
 
     rooms.forEach((room) => {
@@ -218,6 +232,16 @@ export default function PropertiesPage() {
       metricsMap.set(String(propertyId), metrics);
     });
 
+    propertyMap.forEach((property, propertyId) => {
+      const metrics = metricsMap.get(propertyId) || createEmptyMetrics();
+
+      if ((property.propertyType || 'hotel') === 'villa') {
+        metrics.unitStatus = getVillaUnitStatus(metrics);
+      }
+
+      metricsMap.set(propertyId, metrics);
+    });
+
     return metricsMap;
   }, [bookings, invoices, properties, rooms]);
 
@@ -225,15 +249,20 @@ export default function PropertiesPage() {
     return properties
       .map((property) => {
         const metrics = propertyMetricsMap.get(String(property._id)) || createEmptyMetrics();
+        const isVilla = (property.propertyType || 'hotel') === 'villa';
         const totalRooms = metrics.totalRooms || 0;
-        const occupancyRate = totalRooms === 0
-          ? 0
-          : Math.round((metrics.occupiedRooms / totalRooms) * 100);
+
+        const occupancyRate = isVilla
+          ? metrics.unitStatus === 'Occupied' ? 100 : 0
+          : totalRooms === 0
+            ? 0
+            : Math.round((metrics.occupiedRooms / totalRooms) * 100);
 
         return {
           property,
           metrics,
           occupancyRate,
+          isVilla,
           tone: getPortfolioTone(metrics),
           attentionScore: getAttentionScore(metrics)
         };
@@ -302,88 +331,88 @@ export default function PropertiesPage() {
       )}
 
       <div className="properties-grid properties-grid-compact">
-        {!loading && !error && propertyCards.map(({ property, metrics, occupancyRate, tone }) => {
-            const propertyImage = propertyImageMap[property.name] || property.image;
+        {!loading && !error && propertyCards.map(({ property, metrics, occupancyRate, isVilla, tone }) => {
+          const propertyImage = propertyImageMap[property.name] || property.image;
 
-            return (
-              <article
-                key={property._id}
-                className="property-card property-card-compact property-card-clickable property-card-dashboard"
-                onClick={() => handleOpenProperty(property._id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleOpenProperty(property._id);
-                  }
-                }}
-              >
-                <div className="property-card-image-wrap property-card-image-wrap-compact">
-                  <img
-                    src={propertyImage}
-                    alt={property.name}
-                    className="property-card-image property-card-image-compact"
-                  />
-                  <div className="property-card-image-overlay" />
-                  <span className="property-type-badge property-type-badge-overlay property-type-badge-compact">
-                    {property.type}
-                  </span>
-                  <span className={`property-health-chip ${tone.className}`}>
-                    {tone.label}
-                  </span>
-                </div>
+          return (
+            <article
+              key={property._id}
+              className="property-card property-card-compact property-card-clickable property-card-dashboard"
+              onClick={() => handleOpenProperty(property._id)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleOpenProperty(property._id);
+                }
+              }}
+            >
+              <div className="property-card-image-wrap property-card-image-wrap-compact">
+                <img
+                  src={propertyImage}
+                  alt={property.name}
+                  className="property-card-image property-card-image-compact"
+                />
+                <div className="property-card-image-overlay" />
+                <span className="property-type-badge property-type-badge-overlay property-type-badge-compact">
+                  {isVilla ? 'Villa' : 'Hotel'}
+                </span>
+                <span className={`property-health-chip ${tone.className}`}>
+                  {tone.label}
+                </span>
+              </div>
 
-                <div className="property-card-body property-card-body-compact">
-                  <div className="property-card-header-grid">
-                    <div className="property-card-meta-row property-card-meta-row-compact">
-                      <h3>{property.name}</h3>
-                      <p className="property-card-location">{property.location}</p>
-                    </div>
-
-                    <div className="property-occupancy-block">
-                      <span>Occupancy</span>
-                      <strong>{occupancyRate}%</strong>
-                    </div>
+              <div className="property-card-body property-card-body-compact">
+                <div className="property-card-header-grid">
+                  <div className="property-card-meta-row property-card-meta-row-compact">
+                    <h3>{property.name}</h3>
+                    <p className="property-card-location">{property.location}</p>
                   </div>
 
-                  <div className="property-card-ops-grid">
-                    <div>
-                      <span>Ready</span>
-                      <strong>{metrics.readyRooms}</strong>
-                    </div>
-                    <div>
-                      <span>Dirty</span>
-                      <strong>{metrics.dirtyRooms}</strong>
-                    </div>
-                    <div>
-                      <span>Arrivals Today</span>
-                      <strong>{metrics.arrivalsToday}</strong>
-                    </div>
-                    <div>
-                      <span>Departures Today</span>
-                      <strong>{metrics.departuresToday}</strong>
-                    </div>
-                    <div>
-                      <span>Outstanding</span>
-                      <strong>{formatCurrency(metrics.outstandingAmount)}</strong>
-                    </div>
-                    <div>
-                      <span>Overdue Invoices</span>
-                      <strong>{metrics.overdueInvoices}</strong>
-                    </div>
-                  </div>
-
-                  <div className="property-card-footer property-card-footer-dashboard">
-                    <strong className="property-status-chip">{property.status || 'Active'}</strong>
-                    <span className="property-next-arrival-text">
-                      {metrics.nextArrivalDate
-                        ? `Next arrival ${formatDisplayDate(metrics.nextArrivalDate)}`
-                        : 'No upcoming arrivals'}
-                    </span>
+                  <div className="property-occupancy-block">
+                    <span>{isVilla ? 'Status' : 'Occupancy'}</span>
+                    <strong>{isVilla ? metrics.unitStatus : `${occupancyRate}%`}</strong>
                   </div>
                 </div>
-              </article>
-            );
+
+                <div className="property-card-ops-grid">
+                  <div>
+                    <span>{isVilla ? 'Available' : 'Ready'}</span>
+                    <strong>{isVilla ? (metrics.unitStatus === 'Available' ? 1 : 0) : metrics.readyRooms}</strong>
+                  </div>
+                  <div>
+                    <span>{isVilla ? 'Cleaning' : 'Dirty'}</span>
+                    <strong>{metrics.dirtyRooms}</strong>
+                  </div>
+                  <div>
+                    <span>Arrivals Today</span>
+                    <strong>{metrics.arrivalsToday}</strong>
+                  </div>
+                  <div>
+                    <span>Departures Today</span>
+                    <strong>{metrics.departuresToday}</strong>
+                  </div>
+                  <div>
+                    <span>Outstanding</span>
+                    <strong>{formatCurrency(metrics.outstandingAmount)}</strong>
+                  </div>
+                  <div>
+                    <span>Overdue Invoices</span>
+                    <strong>{metrics.overdueInvoices}</strong>
+                  </div>
+                </div>
+
+                <div className="property-card-footer property-card-footer-dashboard">
+                  <strong className="property-status-chip">{property.status || 'Active'}</strong>
+                  <span className="property-next-arrival-text">
+                    {metrics.nextArrivalDate
+                      ? `Next arrival ${formatDisplayDate(metrics.nextArrivalDate)}`
+                      : 'No upcoming arrivals'}
+                  </span>
+                </div>
+              </div>
+            </article>
+          );
         })}
       </div>
     </div>

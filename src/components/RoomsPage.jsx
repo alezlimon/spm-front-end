@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { listAllBookings } from '../api/bookingsApi';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { listBookingsPage } from '../api/bookingsApi';
 import { listPropertyRooms } from '../api/propertiesApi';
 import { listRooms, updateRoom } from '../api/roomsApi';
 import BookingDetailPage from './BookingDetailPage';
@@ -10,18 +10,105 @@ import RoomCard from './RoomCard';
 import RoomsTimelineView from './RoomsTimelineView';
 import '../App.css';
 
+const VALID_ROOM_FILTERS = new Set(['All', 'Ready', 'Dirty', 'Occupied', 'Out of Service']);
+
+function normalizeRoomFilter(value) {
+  if (!value) return 'All';
+
+  const normalized = String(value).trim().toLowerCase();
+
+  if (normalized === 'available' || normalized === 'ready') return 'Ready';
+  if (normalized === 'dirty') return 'Dirty';
+  if (normalized === 'occupied') return 'Occupied';
+  if (
+    normalized === 'out of service'
+    || normalized === 'out-of-service'
+    || normalized === 'maintenance'
+  ) {
+    return 'Out of Service';
+  }
+
+  return 'All';
+}
+
+const activeSummaryCardStyle = {
+  borderColor: 'rgba(212, 168, 93, 0.34)',
+  background: 'rgba(212, 168, 93, 0.1)'
+};
+
+const contextBarStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '12px',
+  padding: '12px 14px',
+  border: '1px solid rgba(255, 248, 240, 0.08)',
+  borderRadius: '14px',
+  background: 'rgba(255, 252, 248, 0.03)',
+  marginBottom: '14px',
+  flexWrap: 'wrap'
+};
+
+const contextTextStyle = {
+  margin: 0,
+  fontSize: '0.88rem',
+  lineHeight: 1.45,
+  color: '#d8d0c6'
+};
+
+const contextTextMutedStyle = {
+  color: '#9f968d'
+};
+
 export default function RoomsPage() {
   const { propertyId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialFilterFromUrl = normalizeRoomFilter(searchParams.get('status'));
+
   const [rooms, setRooms] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState('timeline');
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [filter, setFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState(initialFilterFromUrl);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const urlFilter = normalizeRoomFilter(searchParams.get('status'));
+    const urlSearch = searchParams.get('search') || '';
+
+    setFilter((current) => (current !== urlFilter ? urlFilter : current));
+    setSearchTerm((current) => (current !== urlSearch ? urlSearch : current));
+  }, [searchParams]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (filter && filter !== 'All') {
+      if (filter === 'Ready') nextParams.set('status', 'Available');
+      else if (filter === 'Out of Service') nextParams.set('status', 'Out of Service');
+      else nextParams.set('status', filter);
+    } else {
+      nextParams.delete('status');
+    }
+
+    if (searchTerm.trim()) {
+      nextParams.set('search', searchTerm.trim());
+    } else {
+      nextParams.delete('search');
+    }
+
+    const nextString = nextParams.toString();
+    const currentString = searchParams.toString();
+
+    if (nextString !== currentString) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [filter, searchTerm, searchParams, setSearchParams]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,13 +116,15 @@ export default function RoomsPage() {
       setError('');
 
       try {
-        const [roomsData, bookingsData] = await Promise.all([
+        const [roomsData, bookingsPage] = await Promise.all([
           propertyId ? listPropertyRooms(propertyId) : listRooms(),
-          listAllBookings()
+          listBookingsPage(
+            propertyId ? { propertyId, limit: 500 } : { limit: 500 }
+          )
         ]);
 
-        setRooms(roomsData);
-        setBookings(bookingsData);
+        setRooms(Array.isArray(roomsData) ? roomsData : []);
+        setBookings(Array.isArray(bookingsPage?.items) ? bookingsPage.items : []);
       } catch {
         setError('Could not load rooms');
       } finally {
@@ -124,13 +213,15 @@ export default function RoomsPage() {
       return getOperationalState(room) === filter;
     })
     .filter((room) => {
-      const searchValue = searchTerm.toLowerCase();
+      const searchValue = searchTerm.toLowerCase().trim();
       const operationalState = getOperationalState(room).toLowerCase();
 
+      if (!searchValue) return true;
+
       return (
-        room.roomNumber.toLowerCase().includes(searchValue) ||
-        room.type.toLowerCase().includes(searchValue) ||
-        room.status.toLowerCase().includes(searchValue) ||
+        String(room.roomNumber).toLowerCase().includes(searchValue) ||
+        String(room.type).toLowerCase().includes(searchValue) ||
+        String(room.status).toLowerCase().includes(searchValue) ||
         operationalState.includes(searchValue)
       );
     });
@@ -152,6 +243,8 @@ export default function RoomsPage() {
 
     return String(a.roomNumber).localeCompare(String(b.roomNumber));
   });
+
+  const contextLabel = filter === 'All' ? 'All Rooms' : filter;
 
   return (
     <div className="app">
@@ -199,30 +292,63 @@ export default function RoomsPage() {
       <div className="rooms-layout">
         <section className="rooms-toolbar">
           <div className="rooms-kpi-strip">
-            <div className="summary-card">
+            <div
+              className="summary-card"
+              style={filter === 'All' ? activeSummaryCardStyle : undefined}
+              onClick={() => setFilter('All')}
+            >
               <h3>Total Rooms</h3>
               <p>{totalRooms}</p>
             </div>
 
-            <div className="summary-card" onClick={() => setFilter('Ready')}>
+            <div
+              className="summary-card"
+              style={filter === 'Ready' ? activeSummaryCardStyle : undefined}
+              onClick={() => setFilter('Ready')}
+            >
               <h3>Ready</h3>
               <p>{readyRooms}</p>
             </div>
 
-            <div className="summary-card" onClick={() => setFilter('Dirty')}>
+            <div
+              className="summary-card"
+              style={filter === 'Dirty' ? activeSummaryCardStyle : undefined}
+              onClick={() => setFilter('Dirty')}
+            >
               <h3>Dirty</h3>
               <p>{dirtyRooms}</p>
             </div>
 
-            <div className="summary-card" onClick={() => setFilter('Occupied')}>
+            <div
+              className="summary-card"
+              style={filter === 'Occupied' ? activeSummaryCardStyle : undefined}
+              onClick={() => setFilter('Occupied')}
+            >
               <h3>Occupied</h3>
               <p>{occupiedRooms}</p>
             </div>
 
-            <div className="summary-card" onClick={() => setFilter('Out of Service')}>
+            <div
+              className="summary-card"
+              style={filter === 'Out of Service' ? activeSummaryCardStyle : undefined}
+              onClick={() => setFilter('Out of Service')}
+            >
               <h3>Out of Service</h3>
               <p>{maintenanceRooms}</p>
             </div>
+          </div>
+
+          <div style={contextBarStyle}>
+            <p style={contextTextStyle}>
+              Showing: <strong>{contextLabel}</strong>{' '}
+              <span style={contextTextMutedStyle}>({filteredRooms.length})</span>
+            </p>
+
+            {searchTerm.trim() && (
+              <p style={contextTextStyle}>
+                Search: <strong>{searchTerm.trim()}</strong>
+              </p>
+            )}
           </div>
 
           <div className="rooms-controls">

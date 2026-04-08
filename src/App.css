@@ -5,11 +5,7 @@
 body {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:
-    radial-gradient(circle at 12% 14%, rgba(212, 168, 93, 0.09), transparent 24%),
-    radial-gradient(circle at 84% 18%, rgba(112, 184, 228, 0.08), transparent 22%),
-    radial-gradient(circle at 70% 82%, rgba(116, 198, 157, 0.05), transparent 20%),
-    linear-gradient(180deg, #0f1012 0%, #0a0b0d 100%);
+  background: #07090c;
   color: #14171b;
 }
 
@@ -27,7 +23,7 @@ a {
   width: 100%;
   max-width: 1360px;
   margin: 0 auto;
-  padding: 32px 32px 52px;
+  padding: 28px 32px 40px;
 }
 
 .header {
@@ -36,20 +32,21 @@ a {
 }
 
 .header h1 {
-  margin: 0 0 8px;
-  font-size: 2.3rem;
-  line-height: 1.02;
-  letter-spacing: -0.065em;
-  font-weight: 600;
+  margin: 0 0 6px;
+  font-size: clamp(1.8rem, 3.2vw, 2.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 500;
   color: #f5efe7;
 }
 
 .header p {
   margin: 0;
   max-width: 760px;
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   line-height: 1.6;
-  color: #a89d92;
+  color: rgba(245, 247, 250, 0.55);
+  font-weight: 400;
 }
 
 .rooms-view-toggle {
@@ -134,7 +131,7 @@ a {
 }
 
 .summary-card {
-  background: linear-gradient(180deg, rgba(255, 252, 248, 0.05) 0%, rgba(255, 252, 248, 0.028) 100%);
+  background: #0f1114;
   border: 1px solid rgba(255, 248, 240, 0.09);
   border-radius: 16px;
   padding: 16px;
@@ -147,7 +144,7 @@ a {
 
 .summary-card:hover {
   border-color: rgba(255, 248, 240, 0.18);
-  background-color: rgba(255, 252, 248, 0.06);
+  background-color: rgba(255, 252, 248, 0.04);
   transform: translateY(-2px);
 }
 
@@ -157,7 +154,7 @@ a {
 
 .summary-card-static:hover {
   border-color: rgba(255, 248, 240, 0.09);
-  background: linear-gradient(180deg, rgba(255, 252, 248, 0.05) 0%, rgba(255, 252, 248, 0.028) 100%);
+  background: #0f1114;
   transform: none;
 }
 
@@ -714,7 +711,7 @@ a {
   background: rgba(15, 14, 13, 0.86);
   position: sticky;
   top: 10px;
-  z-index: 25;
+  zIndex: 25;
   backdrop-filter: blur(8px);
 }
 
@@ -1207,10 +1204,7 @@ a {
 /* AUTH / SPLASH */
 .auth-page {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(212, 168, 93, 0.12), transparent 28%),
-    radial-gradient(circle at 82% 76%, rgba(155, 140, 128, 0.12), transparent 26%),
-    linear-gradient(180deg, #151311 0%, #0f0e0d 100%);
+  background: #07090c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1222,7 +1216,7 @@ a {
 .splash-screen {
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at top, #2d261f 0%, #171311 48%, #0f0d0c 100%);
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1317,21 +1311,11 @@ a {
 }
 
 .login-background-glow-one {
-  width: 280px;
-  height: 280px;
-  top: 8%;
-  left: 50%;
-  transform: translateX(-70%);
-  background: rgba(212, 168, 93, 0.09);
+  display: none;
 }
 
 .login-background-glow-two {
-  width: 260px;
-  height: 260px;
-  bottom: 8%;
-  right: 50%;
-  transform: translateX(75%);
-  background: rgba(122, 112, 102, 0.12);
+  display: none;
 }
 
 .login-minimal-layout {
@@ -1516,7 +1500,7 @@ a {
 
 /* PROPERTIES PAGE */
 .properties-page-header {
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .properties-page-header-minimal {
@@ -1532,18 +1516,18 @@ a {
 
 .properties-page-heading-block-minimal h1 {
   margin: 0;
-  font-size: 3rem;
-  line-height: 0.94;
-  letter-spacing: -0.09em;
-  font-weight: 600;
+  font-size: clamp(1.8rem, 3.2vw, 2.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 500;
   color: #f8f2ea;
 }
 
 .properties-page-meta-minimal {
-  margin: 10px 0 0;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #8f867d;
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(245, 247, 250, 0.55);
 }
 
 .properties-portfolio-kpis {
@@ -1568,12 +1552,12 @@ a {
 }
 
 .property-card-compact {
-  background: #15171a;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #0f1114;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background-color 0.18s ease;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 .property-card-clickable {
@@ -1581,9 +1565,9 @@ a {
 }
 
 .property-card-clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 26px 56px rgba(0, 0, 0, 0.26);
-  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .property-card-clickable:hover .property-card-image-compact {
@@ -1591,7 +1575,7 @@ a {
 }
 
 .property-card-clickable:hover .property-card-body-compact {
-  background: #17191d;
+  background: #111419;
 }
 
 .property-card-clickable:focus-visible {
@@ -1694,12 +1678,12 @@ a {
 
 .property-card-body {
   padding: 22px 22px 20px;
-  background: #15171a;
+  background: #0f1114;
 }
 
 .property-card-body-compact {
   padding: 14px 15px 15px;
-  background: #15171a;
+  background: #0f1114;
   transition: background-color 0.18s ease;
 }
 
@@ -1751,18 +1735,18 @@ a {
 
 .property-card-meta-row h3 {
   margin: 0 0 4px;
-  font-size: 1rem;
+  font-size: 0.98rem;
   line-height: 1.14;
-  font-weight: 600;
-  letter-spacing: -0.035em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   color: #f3ede4;
 }
 
 .property-card-location {
   margin: 0;
   font-size: 0.88rem;
-  line-height: 1.4;
-  color: #8d857d;
+  line-height: 1.5;
+  color: rgba(245, 247, 250, 0.55);
 }
 
 .property-card-ops-grid {
@@ -2073,18 +2057,18 @@ a {
 
 .property-detail-hero-content h1 {
   margin: 0 0 8px;
-  font-size: 2.75rem;
-  line-height: 0.96;
-  letter-spacing: -0.08em;
-  font-weight: 600;
+  font-size: clamp(1.9rem, 3.3vw, 2.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 500;
   color: #f8f2ea;
 }
 
 .property-detail-location {
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: #9f968d;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(245, 247, 250, 0.55);
 }
 
 .property-detail-description {
@@ -2751,7 +2735,7 @@ a {
 
 @media (min-width: 768px) {
   .app {
-    padding: 30px 32px 46px;
+    padding: 28px 32px 40px;
   }
 
   .billing-kpi-grid {
@@ -2821,7 +2805,7 @@ a {
 
 @media (min-width: 1100px) {
   .header h1 {
-    font-size: 2.35rem;
+    font-size: clamp(1.8rem, 3.2vw, 2.2rem);
   }
 
   .summary-grid {
@@ -2900,6 +2884,7 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
 /* BOOKINGS PAGE HEADER ROW */
 .bookings-page-header-row {
   display: flex;
@@ -2910,177 +2895,19 @@ a {
 }
 
 .bookings-page-header-row h1 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
+  font-size: clamp(1.8rem, 3.2vw, 2.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+  color: #f5efe7;
 }
 
 .bookings-page-header-row p {
   margin: 0;
-}
-
-@media (max-width: 767px) {
-  .app {
-    padding: 18px 14px 34px;
-  }
-
-  .header {
-    margin-bottom: 18px;
-  }
-
-  .header h1 {
-    font-size: 1.9rem;
-    letter-spacing: -0.05em;
-  }
-
-  .header p {
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-
-  .summary-card,
-  .guest-form-card,
-  .guest-card,
-  .room-card,
-  .bookings-table-wrapper,
-  .rooms-controls,
-  .billing-controls {
-    border-radius: 14px;
-  }
-
-  .summary-card {
-    padding: 14px;
-  }
-
-  .summary-card h3 {
-    font-size: 0.68rem;
-  }
-
-  .summary-card p {
-    font-size: 1.24rem;
-  }
-
-  .bookings-page-header-row {
-    gap: 10px;
-  }
-
-  .bookings-page-header-row .primary-button {
-    width: 100%;
-  }
-
-  .rooms-view-toggle {
-    width: 100%;
-    justify-content: space-between;
-    gap: 6px;
-  }
-
-  .rooms-view-toggle button {
-    flex: 1;
-    text-align: center;
-    padding: 8px 10px;
-  }
-
-  .rooms-kpi-strip,
-  .properties-portfolio-kpis,
-  .billing-kpi-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .rooms-controls {
-    position: static;
-    top: auto;
-  }
-
-  .rooms-filter-pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .rooms-filter-pill {
-    flex: 0 0 auto;
-  }
-
-  .properties-page-heading-block-minimal h1 {
-    font-size: 2.3rem;
-    line-height: 0.98;
-  }
-
-  .property-card-image-compact {
-    height: 190px;
-  }
-
-  .property-card-header-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .property-occupancy-block {
-    justify-items: start;
-  }
-
-  .property-card-ops-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .property-card-footer-dashboard {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .property-next-arrival-text {
-    text-align: left;
-  }
-
-  .guests-page-layout {
-    gap: 14px;
-  }
-
-  .guest-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .guest-form-grid input[type="date"] {
-    grid-column: auto;
-  }
-
-  .billing-controls {
-    grid-template-columns: 1fr;
-  }
-
-  .billing-table {
-    min-width: 760px;
-  }
-
-  .billing-modal {
-    width: 100%;
-    max-height: 88vh;
-  }
-
-  .billing-detail-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .billing-payments-list li {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .rooms-timeline-header,
-  .rooms-timeline-row {
-    min-width: 860px;
-    grid-template-columns: 150px minmax(700px, 1fr);
-  }
-
-  .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  .modal-panel {
-    max-width: none;
-    width: 100%;
-    max-height: 92vh;
-    border-radius: 16px 16px 0 0;
-  }
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(245, 247, 250, 0.55);
 }
 
 /* NEW BOOKING MODAL */
@@ -3608,4 +3435,170 @@ a {
 .modal-companion-toggle-on {
   border-color: rgba(184, 100, 100, 0.28);
   color: #e0a8a8;
+}
+
+@media (max-width: 767px) {
+  .app {
+    padding: 18px 14px 34px;
+  }
+
+  .header {
+    margin-bottom: 18px;
+  }
+
+  .header h1 {
+    font-size: 1.9rem;
+    letter-spacing: -0.03em;
+  }
+
+  .header p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .summary-card,
+  .guest-form-card,
+  .guest-card,
+  .room-card,
+  .bookings-table-wrapper,
+  .rooms-controls,
+  .billing-controls {
+    border-radius: 14px;
+  }
+
+  .summary-card {
+    padding: 14px;
+  }
+
+  .summary-card h3 {
+    font-size: 0.68rem;
+  }
+
+  .summary-card p {
+    font-size: 1.24rem;
+  }
+
+  .bookings-page-header-row {
+    gap: 10px;
+  }
+
+  .bookings-page-header-row .primary-button {
+    width: 100%;
+  }
+
+  .rooms-view-toggle {
+    width: 100%;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .rooms-view-toggle button {
+    flex: 1;
+    text-align: center;
+    padding: 8px 10px;
+  }
+
+  .rooms-kpi-strip,
+  .properties-portfolio-kpis,
+  .billing-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rooms-controls {
+    position: static;
+    top: auto;
+  }
+
+  .rooms-filter-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .rooms-filter-pill {
+    flex: 0 0 auto;
+  }
+
+  .properties-page-heading-block-minimal h1 {
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .property-card-image-compact {
+    height: 190px;
+  }
+
+  .property-card-header-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .property-occupancy-block {
+    justify-items: start;
+  }
+
+  .property-card-ops-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .property-card-footer-dashboard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .property-next-arrival-text {
+    text-align: left;
+  }
+
+  .guests-page-layout {
+    gap: 14px;
+  }
+
+  .guest-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-form-grid input[type="date"] {
+    grid-column: auto;
+  }
+
+  .billing-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-table {
+    min-width: 760px;
+  }
+
+  .billing-modal {
+    width: 100%;
+    max-height: 88vh;
+  }
+
+  .billing-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .billing-payments-list li {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rooms-timeline-header,
+  .rooms-timeline-row {
+    min-width: 860px;
+    grid-template-columns: 150px minmax(700px, 1fr);
+  }
+
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-panel {
+    max-width: none;
+    width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
 }

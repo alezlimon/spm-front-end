@@ -2,37 +2,6 @@ import { getStoredToken } from '../utils/auth';
 import { AUTH_SESSION_EXPIRED_EVENT } from '../utils/events';
 import { buildApiUrl, buildAuthUrl } from './config';
 
-const ENABLE_LEGACY_ERROR_TRANSLATIONS =
-  import.meta.env.VITE_ENABLE_LEGACY_ERROR_TRANSLATIONS === 'true';
-
-// Temporary fallback for legacy mixed-language backend messages.
-// Remove after backend contract re-validation in staging (target: 2026-04-12).
-const MESSAGE_TRANSLATIONS = new Map([
-  ['No se pudo guardar el huésped', 'Could not save guest'],
-  ['El campo birthDate es obligatorio y debe ser una fecha valida (YYYY-MM-DD)', 'Birth date is required and must be a valid date (YYYY-MM-DD)'],
-  ['Reserva no encontrada', 'Booking not found'],
-  ['Huesped no encontrado', 'Guest not found'],
-  ['Huésped no encontrado', 'Guest not found']
-]);
-
-const translateMessage = (message) => {
-  if (typeof message !== 'string') {
-    return message;
-  }
-
-  const trimmedMessage = message.trim();
-
-  if (!trimmedMessage) {
-    return message;
-  }
-
-  if (!ENABLE_LEGACY_ERROR_TRANSLATIONS) {
-    return trimmedMessage;
-  }
-
-  return MESSAGE_TRANSLATIONS.get(trimmedMessage) || trimmedMessage;
-};
-
 export class ApiError extends Error {
   constructor(message, { status, payload } = {}) {
     super(message);
@@ -55,26 +24,26 @@ const readResponseBody = async (response) => {
 
 export const getErrorMessage = (payload, fallback = 'Request failed') => {
   if (typeof payload === 'string' && payload.trim()) {
-    return translateMessage(payload);
+    return payload.trim();
   }
 
   if (typeof payload?.message === 'string' && payload.message.trim()) {
-    return translateMessage(payload.message);
+    return payload.message.trim();
   }
 
   if (typeof payload?.error === 'string' && payload.error.trim()) {
-    return translateMessage(payload.error);
+    return payload.error.trim();
   }
 
   if (Array.isArray(payload?.details) && payload.details.length > 0) {
-    const detail = payload.details[0];
+    const firstDetail = payload.details[0];
 
-    if (typeof detail === 'string' && detail.trim()) {
-      return translateMessage(detail);
+    if (typeof firstDetail === 'string' && firstDetail.trim()) {
+      return firstDetail.trim();
     }
 
-    if (typeof detail?.msg === 'string' && detail.msg.trim()) {
-      return translateMessage(detail.msg);
+    if (typeof firstDetail?.msg === 'string' && firstDetail.msg.trim()) {
+      return firstDetail.msg.trim();
     }
   }
 
@@ -82,19 +51,19 @@ export const getErrorMessage = (payload, fallback = 'Request failed') => {
     const firstError = payload.errors[0];
 
     if (typeof firstError === 'string' && firstError.trim()) {
-      return translateMessage(firstError);
+      return firstError.trim();
     }
 
     if (typeof firstError?.message === 'string' && firstError.message.trim()) {
-      return translateMessage(firstError.message);
+      return firstError.message.trim();
     }
 
     if (typeof firstError?.msg === 'string' && firstError.msg.trim()) {
-      return translateMessage(firstError.msg);
+      return firstError.msg.trim();
     }
   }
 
-  return translateMessage(fallback);
+  return fallback;
 };
 
 export async function apiRequest(path, options = {}) {
@@ -139,9 +108,9 @@ export async function apiRequest(path, options = {}) {
     const requestHasAuthHeader = Boolean(requestHeaders.Authorization);
 
     if (
-      response.status === 401
-      && requestHasAuthHeader
-      && typeof window !== 'undefined'
+      response.status === 401 &&
+      requestHasAuthHeader &&
+      typeof window !== 'undefined'
     ) {
       window.dispatchEvent(new CustomEvent(AUTH_SESSION_EXPIRED_EVENT));
     }

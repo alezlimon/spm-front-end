@@ -65,9 +65,8 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
       setRoomsError('');
       setSelectedRoom(null);
       try {
-        const data = await listPropertyRooms(propertyId);
-        setRooms((data || []).filter((r) => r.status === 'Available'));
-      } catch (err) {
+        const data = await listPropertyRooms(propertyId, { checkIn, checkOut });
+setRooms(data || []);      } catch (err) {
         setRoomsError(err.message || 'Error loading rooms');
       } finally {
         setRoomsLoading(false);
