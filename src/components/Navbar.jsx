@@ -2,13 +2,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 
 const navStyle = {
-  background: 'rgba(5, 6, 8, 0.82)',
-  borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+  background: '#000000',
+  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
   backdropFilter: 'blur(14px)',
   position: 'sticky',
   top: 0,
   zIndex: 100,
-  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.16)'
+  boxShadow: '0 10px 28px rgba(0, 0, 0, 0.32)'
 };
 
 const navInnerStyle = {
@@ -31,14 +31,14 @@ const brandStyle = {
 };
 
 const logoutStyle = {
-  color: 'rgba(245, 247, 250, 0.82)',
+  color: 'rgba(245, 247, 250, 0.84)',
   textDecoration: 'none',
   fontWeight: 500,
   fontSize: '0.88rem',
   letterSpacing: '0.01em',
-  transition: 'color 0.18s ease',
-  background: 'rgba(255, 255, 255, 0.03)',
-  border: '1px solid rgba(255, 255, 255, 0.07)',
+  transition: 'color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease',
+  background: 'rgba(255, 255, 255, 0.02)',
+  border: '1px solid rgba(255, 255, 255, 0.06)',
   cursor: 'pointer',
   borderRadius: '999px',
   padding: '7px 12px',

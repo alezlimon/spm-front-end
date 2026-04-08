@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import {
   BOOKINGS_QUERY_MODE,
   buildBookingsDebugPath,
@@ -23,12 +23,21 @@ const getEntityId = (value) => {
 
 const normalizeStatus = (status) => (status || '').toLowerCase();
 const DEFAULT_PAGE_SIZE = 10;
+const VALID_STATUS_FILTERS = new Set(['all', 'confirmed', 'cancelled', 'checked-in', 'checked-out']);
 
 export default function BookingsTable({ refreshKey, onViewBooking }) {
   const { propertyId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialDateFromUrl = searchParams.get('date');
+  const initialStatusFromUrl = searchParams.get('status');
+
   const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(() => toInputDate(new Date()));
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedDate, setSelectedDate] = useState(() => initialDateFromUrl || toInputDate(new Date()));
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const normalized = normalizeStatus(initialStatusFromUrl);
+    return VALID_STATUS_FILTERS.has(normalized) ? normalized : 'all';
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -39,10 +48,70 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const [actionFeedbackById, setActionFeedbackById] = useState({});
   const [recentActionErrors, setRecentActionErrors] = useState([]);
   const [copiedQueryState, setCopiedQueryState] = useState('');
+
   const feedbackTimeoutsRef = useRef({});
   const requestSequenceRef = useRef(0);
   const activeRequestControllerRef = useRef(null);
   const queryCopyTimeoutRef = useRef(null);
+  const hasInitializedFromUrlRef = useRef(false);
+
+  useEffect(() => {
+    const urlDate = searchParams.get('date');
+    const urlStatus = normalizeStatus(searchParams.get('status'));
+
+    if (!hasInitializedFromUrlRef.current) {
+      hasInitializedFromUrlRef.current = true;
+
+      if (urlDate) {
+        setSelectedDate(urlDate);
+      }
+
+      if (VALID_STATUS_FILTERS.has(urlStatus)) {
+        setStatusFilter(urlStatus);
+      }
+
+      return;
+    }
+
+    if (urlDate && urlDate !== selectedDate) {
+      setSelectedDate(urlDate);
+    }
+
+    if (!urlDate && selectedDate !== toInputDate(new Date())) {
+      setSelectedDate(toInputDate(new Date()));
+    }
+
+    if (VALID_STATUS_FILTERS.has(urlStatus) && urlStatus !== statusFilter) {
+      setStatusFilter(urlStatus);
+    }
+
+    if (!urlStatus && statusFilter !== 'all') {
+      setStatusFilter('all');
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (selectedDate) {
+      nextParams.set('date', selectedDate);
+    } else {
+      nextParams.delete('date');
+    }
+
+    if (statusFilter && statusFilter !== 'all') {
+      nextParams.set('status', statusFilter);
+    } else {
+      nextParams.delete('status');
+    }
+
+    const nextString = nextParams.toString();
+    const currentString = searchParams.toString();
+
+    if (nextString !== currentString) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [selectedDate, statusFilter, searchParams, setSearchParams]);
 
   const setRowFeedback = (bookingId, feedback) => {
     if (feedbackTimeoutsRef.current[bookingId]) {
@@ -309,11 +378,11 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
   const queryPreviewPath = propertyId
     ? '/api/bookings (property-scoped view applies local room filtering)'
     : buildBookingsDebugPath({
-      status: statusFilter,
-      date: selectedDate,
-      page: currentPage,
-      limit: DEFAULT_PAGE_SIZE
-    });
+        status: statusFilter,
+        date: selectedDate,
+        page: currentPage,
+        limit: DEFAULT_PAGE_SIZE
+      });
   const isQueryCopyDisabled = Boolean(propertyId);
 
   const handleCopyQueryPreview = async () => {
@@ -403,6 +472,7 @@ export default function BookingsTable({ refreshKey, onViewBooking }) {
         </div>
 
         <p>Track reservations for the selected day and filter by status.</p>
+
         {import.meta.env.DEV && (
           <div className="bookings-dev-hint" role="status" aria-live="polite">
             <p>

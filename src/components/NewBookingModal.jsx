@@ -6,6 +6,7 @@ import { listPropertyRooms } from '../api/propertiesApi';
 import { EmptyState, ErrorState, LoadingState } from './PageState';
 import { toInputDate } from '../utils/date';
 import { formatCurrency } from '../utils/money';
+
 const BREAKFAST_PRICE = 15;
 
 const calcNights = (checkIn, checkOut) => {
@@ -14,13 +15,27 @@ const calcNights = (checkIn, checkOut) => {
   return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
 };
 
-const EMPTY_GUEST = { firstName: '', lastName: '', email: '', document: '', birthDate: '', phone: '' };
-const EMPTY_COMPANION = { firstName: '', lastName: '', document: '', birthDate: '', email: '', phone: '' };
+const EMPTY_GUEST = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  document: '',
+  birthDate: '',
+  phone: ''
+};
+
+const EMPTY_COMPANION = {
+  firstName: '',
+  lastName: '',
+  document: '',
+  birthDate: '',
+  email: '',
+  phone: ''
+};
 
 export default function NewBookingModal({ propertyId, onClose, onCreated }) {
   const [step, setStep] = useState(1);
 
-  // Step 1
   const [checkIn, setCheckIn] = useState(toInputDate());
   const [checkOut, setCheckOut] = useState('');
   const [rooms, setRooms] = useState([]);
@@ -28,10 +43,8 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
   const [roomsLoading, setRoomsLoading] = useState(false);
   const [roomsError, setRoomsError] = useState('');
 
-  // Step 2
   const [breakfast, setBreakfast] = useState(false);
 
-  // Step 3
   const [guestTab, setGuestTab] = useState('new');
   const [guestSearch, setGuestSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -48,52 +61,57 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
   const breakfastCost = breakfast ? BREAKFAST_PRICE * nights : 0;
   const total = basePrice + breakfastCost;
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
-  // Fetch available rooms when dates change
   useEffect(() => {
     if (!checkIn || !checkOut || nights <= 0) {
       setRooms([]);
       return;
     }
-    const fetch_ = async () => {
+
+    const fetchRooms = async () => {
       setRoomsLoading(true);
       setRoomsError('');
       setSelectedRoom(null);
+
       try {
-        const data = await listPropertyRooms(propertyId);
-        setRooms((data || []).filter((r) => r.status === 'Available'));
+        const data = await listPropertyRooms(propertyId, { checkIn, checkOut });
+        setRooms(data || []);
       } catch (err) {
         setRoomsError(err.message || 'Error loading rooms');
       } finally {
         setRoomsLoading(false);
       }
     };
-    fetch_();
+
+    fetchRooms();
   }, [checkIn, checkOut, propertyId, nights]);
 
-  // Debounced guest search
   useEffect(() => {
     if (guestTab !== 'existing' || guestSearch.trim().length < 2) {
       setSearchResults([]);
       return;
     }
+
     const timer = setTimeout(async () => {
       try {
         const data = await listGuests(guestSearch);
         setSearchResults(data || []);
       } catch {
-        // ignore
+        setSearchResults([]);
       }
     }, 300);
+
     return () => clearTimeout(timer);
   }, [guestSearch, guestTab]);
 
-  const canProceedStep1 = checkIn && checkOut && nights > 0 && selectedRoom !== null;
+  const canProceedStep1 =
+    checkIn && checkOut && nights > 0 && selectedRoom !== null;
 
   const step1ValidationMessage = (() => {
     if (!checkIn) return 'Select a check-in date.';
@@ -107,21 +125,25 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
   const validatePrimaryGuest = () => {
     const { firstName, lastName, email, document, birthDate } = newGuest;
+
     if (!firstName.trim()) return 'First name is required';
     if (!lastName.trim()) return 'Last name is required';
     if (!email.trim()) return 'Email is required';
     if (!isValidEmail(email)) return 'Invalid email format';
     if (!document.trim()) return 'ID / Passport is required';
     if (!birthDate) return 'Birth date is required';
+
     return null;
   };
 
   const validateCompanion = () => {
     const { firstName, lastName, document, birthDate } = companion;
+
     if (!firstName.trim()) return 'Companion first name is required';
     if (!lastName.trim()) return 'Companion last name is required';
     if (!document.trim()) return 'Companion ID / Passport is required';
     if (!birthDate) return 'Companion birth date is required';
+
     return null;
   };
 
@@ -133,12 +155,15 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
       return getErrorMessage(data, 'Conflict while creating reservation');
     }
+
     if (status === 401) {
       return 'Session expired - please log in again';
     }
+
     if (status === 400) {
       return getErrorMessage(data, 'Invalid data provided');
     }
+
     return getErrorMessage(data, 'Request failed');
   };
 
@@ -147,23 +172,32 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
     if (guestTab === 'new') {
       const err = validatePrimaryGuest();
-      if (err) { setSubmitError(err); return; }
-    } else {
-      if (!selectedGuest) { setSubmitError('Please select an existing guest'); return; }
+      if (err) {
+        setSubmitError(err);
+        return;
+      }
+    } else if (!selectedGuest) {
+      setSubmitError('Please select an existing guest');
+      return;
     }
 
     if (hasCompanion) {
       const err = validateCompanion();
-      if (err) { setSubmitError(err); return; }
+      if (err) {
+        setSubmitError(err);
+        return;
+      }
     }
 
     setSubmitting(true);
+
     try {
-      // Create companion if provided
       if (hasCompanion) {
         const compBody = { ...companion };
+
         if (!compBody.email) delete compBody.email;
         if (!compBody.phone) delete compBody.phone;
+
         try {
           await createGuest(compBody);
         } catch (error) {
@@ -171,7 +205,6 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         }
       }
 
-      // Build booking payload
       const bookingPayload = {
         room: selectedRoom._id,
         checkIn,
@@ -179,10 +212,9 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
         numberOfGuests: hasCompanion ? 2 : 1,
         status: 'confirmed',
         breakfastIncluded: breakfast,
-        totalPrice: total,
+        totalPrice: total
       };
 
-      // Add guest reference
       if (guestTab === 'new') {
         const primaryGuestData = { ...newGuest };
         if (!primaryGuestData.phone) delete primaryGuestData.phone;
@@ -209,8 +241,6 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-
-        {/* Header */}
         <div className="modal-header">
           <div>
             <h2>New Reservation</h2>
@@ -226,10 +256,16 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
               ))}
             </div>
           </div>
-          <button className="modal-close" onClick={onClose} type="button" aria-label="Close">✕</button>
+          <button
+            className="modal-close"
+            onClick={onClose}
+            type="button"
+            aria-label="Close"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* Step 1: Dates & Room */}
         {step === 1 && (
           <div className="modal-body">
             <div className="modal-date-row">
@@ -239,31 +275,43 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                   type="date"
                   value={checkIn}
                   min={toInputDate()}
-                  onChange={(e) => { setCheckIn(e.target.value); setSelectedRoom(null); }}
+                  onChange={(e) => {
+                    setCheckIn(e.target.value);
+                    setSelectedRoom(null);
+                  }}
                 />
               </label>
+
               <label className="modal-field">
                 <span>Check-out</span>
                 <input
                   type="date"
                   value={checkOut}
                   min={checkIn || toInputDate()}
-                  onChange={(e) => { setCheckOut(e.target.value); setSelectedRoom(null); }}
+                  onChange={(e) => {
+                    setCheckOut(e.target.value);
+                    setSelectedRoom(null);
+                  }}
                 />
               </label>
+
               {nights > 0 && (
-                <span className="modal-nights">{nights} night{nights !== 1 ? 's' : ''}</span>
+                <span className="modal-nights">
+                  {nights} night{nights !== 1 ? 's' : ''}
+                </span>
               )}
             </div>
 
             {nights > 0 && (
               <div className="modal-rooms-section">
                 <p className="modal-section-label">Select a room</p>
+
                 {roomsLoading && <LoadingState message="Loading rooms..." />}
                 {!roomsLoading && <ErrorState message={roomsError} />}
                 {!roomsLoading && !roomsError && rooms.length === 0 && (
                   <EmptyState message="No available rooms for these dates." />
                 )}
+
                 <div className="modal-rooms-grid">
                   {rooms.map((room) => (
                     <button
@@ -274,8 +322,12 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                     >
                       <span className="modal-room-number">Room {room.roomNumber}</span>
                       <span className="modal-room-type">{room.type}</span>
-                      <span className="modal-room-price">{formatCurrency(room.pricePerNight)} / night</span>
-                      <span className="modal-room-total">{formatCurrency(room.pricePerNight * nights)} total</span>
+                      <span className="modal-room-price">
+                        {formatCurrency(room.pricePerNight)} / night
+                      </span>
+                      <span className="modal-room-total">
+                        {formatCurrency(room.pricePerNight * nights)} total
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -284,14 +336,18 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
           </div>
         )}
 
-        {/* Step 2: Pricing */}
         {step === 2 && (
           <div className="modal-body">
             <div className="modal-pricing-summary">
               <div className="modal-pricing-row">
-                <span>Room {selectedRoom.roomNumber} — {selectedRoom.type}</span>
-                <span>{formatCurrency(selectedRoom.pricePerNight)} × {nights} night{nights !== 1 ? 's' : ''}</span>
+                <span>
+                  Room {selectedRoom.roomNumber} — {selectedRoom.type}
+                </span>
+                <span>
+                  {formatCurrency(selectedRoom.pricePerNight)} × {nights} night{nights !== 1 ? 's' : ''}
+                </span>
               </div>
+
               <div className="modal-pricing-row">
                 <span>Base price</span>
                 <strong>{formatCurrency(basePrice)}</strong>
@@ -315,7 +371,9 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
 
             {breakfast && (
               <div className="modal-pricing-row modal-pricing-breakfast">
-                <span>Breakfast ({formatCurrency(BREAKFAST_PRICE)} × {nights} night{nights !== 1 ? 's' : ''})</span>
+                <span>
+                  Breakfast ({formatCurrency(BREAKFAST_PRICE)} × {nights} night{nights !== 1 ? 's' : ''})
+                </span>
                 <span>+{formatCurrency(breakfastCost)}</span>
               </div>
             )}
@@ -327,17 +385,21 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
           </div>
         )}
 
-        {/* Step 3: Guest */}
         {step === 3 && (
           <div className="modal-body">
             <div className="modal-guest-tabs">
               <button
                 type="button"
                 className={`modal-tab${guestTab === 'new' ? ' modal-tab-active' : ''}`}
-                onClick={() => { setGuestTab('new'); setSelectedGuest(null); setGuestSearch(''); }}
+                onClick={() => {
+                  setGuestTab('new');
+                  setSelectedGuest(null);
+                  setGuestSearch('');
+                }}
               >
                 New guest
               </button>
+
               <button
                 type="button"
                 className={`modal-tab${guestTab === 'existing' ? ' modal-tab-active' : ''}`}
@@ -353,8 +415,12 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                   className="modal-search-input"
                   placeholder="Search by name or email..."
                   value={guestSearch}
-                  onChange={(e) => { setGuestSearch(e.target.value); setSelectedGuest(null); }}
+                  onChange={(e) => {
+                    setGuestSearch(e.target.value);
+                    setSelectedGuest(null);
+                  }}
                 />
+
                 {!selectedGuest && searchResults.length > 0 && (
                   <div className="modal-search-results">
                     {searchResults.map((g) => (
@@ -362,7 +428,11 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                         key={g._id}
                         type="button"
                         className="modal-search-result-item"
-                        onClick={() => { setSelectedGuest(g); setSearchResults([]); setGuestSearch(''); }}
+                        onClick={() => {
+                          setSelectedGuest(g);
+                          setSearchResults([]);
+                          setGuestSearch('');
+                        }}
                       >
                         <span>{g.firstName} {g.lastName}</span>
                         <small>{g.email}</small>
@@ -370,6 +440,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                     ))}
                   </div>
                 )}
+
                 {selectedGuest && (
                   <div className="modal-guest-selected">
                     <span>{selectedGuest.firstName} {selectedGuest.lastName}</span>
@@ -377,8 +448,13 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                     <button
                       type="button"
                       className="modal-guest-clear"
-                      onClick={() => { setSelectedGuest(null); setGuestSearch(''); }}
-                    >✕</button>
+                      onClick={() => {
+                        setSelectedGuest(null);
+                        setGuestSearch('');
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 )}
               </div>
@@ -387,8 +463,10 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
             {guestTab === 'new' && (
               <div className="modal-guest-form">
                 <p className="modal-section-label">
-                  Primary guest&nbsp;<span className="modal-required-note">* required fields</span>
+                  Primary guest&nbsp;
+                  <span className="modal-required-note">* required fields</span>
                 </p>
+
                 <div className="modal-form-grid">
                   <label className="modal-field">
                     <span>First name *</span>
@@ -398,6 +476,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setNewGuest({ ...newGuest, firstName: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Last name *</span>
                     <input
@@ -406,6 +485,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setNewGuest({ ...newGuest, lastName: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Email *</span>
                     <input
@@ -415,6 +495,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setNewGuest({ ...newGuest, email: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>ID / Passport *</span>
                     <input
@@ -423,6 +504,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setNewGuest({ ...newGuest, document: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Birth date *</span>
                     <input
@@ -431,6 +513,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setNewGuest({ ...newGuest, birthDate: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Phone <small>(optional)</small></span>
                     <input
@@ -454,8 +537,10 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
             {hasCompanion && (
               <div className="modal-guest-form">
                 <p className="modal-section-label">
-                  Accompanying guest&nbsp;<span className="modal-required-note">* required fields</span>
+                  Accompanying guest&nbsp;
+                  <span className="modal-required-note">* required fields</span>
                 </p>
+
                 <div className="modal-form-grid">
                   <label className="modal-field">
                     <span>First name *</span>
@@ -465,6 +550,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setCompanion({ ...companion, firstName: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Last name *</span>
                     <input
@@ -473,6 +559,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setCompanion({ ...companion, lastName: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>ID / Passport *</span>
                     <input
@@ -481,6 +568,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setCompanion({ ...companion, document: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Birth date *</span>
                     <input
@@ -489,6 +577,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setCompanion({ ...companion, birthDate: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Email <small>(optional)</small></span>
                     <input
@@ -498,6 +587,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
                       onChange={(e) => setCompanion({ ...companion, email: e.target.value })}
                     />
                   </label>
+
                   <label className="modal-field">
                     <span>Phone <small>(optional)</small></span>
                     <input
@@ -516,24 +606,36 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
           </div>
         )}
 
-        {/* Footer */}
         <div className="modal-footer">
           {step === 1 && !canProceedStep1 && (
-            <p className="page-feedback page-feedback-error" style={{ marginRight: '12px' }}>
+            <p
+              className="page-feedback page-feedback-error"
+              style={{ marginRight: '12px' }}
+            >
               {step1ValidationMessage}
             </p>
           )}
 
           {step > 1 ? (
-            <button type="button" className="secondary-button" onClick={() => setStep(step - 1)}>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setStep(step - 1)}
+            >
               Back
             </button>
           ) : (
-            <button type="button" className="secondary-button" onClick={onClose}>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={onClose}
+            >
               Cancel
             </button>
           )}
+
           <div style={{ flex: 1 }} />
+
           {step < 3 && (
             <button
               type="button"
@@ -544,6 +646,7 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
               Next
             </button>
           )}
+
           {step === 3 && (
             <button
               type="button"
@@ -555,7 +658,6 @@ export default function NewBookingModal({ propertyId, onClose, onCreated }) {
             </button>
           )}
         </div>
-
       </div>
     </div>
   );
