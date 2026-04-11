@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { updateGuest } from '../api/guestsApi';
+import { updateGuest, deleteGuest } from '../api/guestsApi';
 import { EmptyState } from './PageState';
 import EditGuestForm from './EditGuestForm';
 import '../App.css';
@@ -16,12 +16,16 @@ export default function GuestList({ guests, onGuestUpdated }) {
 
   const handleSave = async (id, updatedData) => {
     await updateGuest(id, updatedData);
-
     setEditingId(null);
-
     if (onGuestUpdated) {
       onGuestUpdated();
     }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this guest?')) return;
+    await deleteGuest(id);
+    if (onGuestUpdated) onGuestUpdated();
   };
 
   return (
@@ -45,6 +49,12 @@ export default function GuestList({ guests, onGuestUpdated }) {
                   onClick={() => handleEdit(guest._id)}
                 >
                   Edit
+                </button>
+                <button
+                  className="secondary-button"
+                  onClick={() => handleDelete(guest._id)}
+                >
+                  Delete
                 </button>
               </div>
 

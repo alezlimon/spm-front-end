@@ -23,3 +23,9 @@ export async function updateGuest(guestId, payload) {
     body: payload
   });
 }
+export async function deleteGuest(guestId) {
+  return apiRequest(`/guests/${guestId}`, {
+    method: 'DELETE',
+    auth: true
+  });
+}
